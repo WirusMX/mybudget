@@ -1,5 +1,7 @@
 package com.wirusmx.mybudget;
 
+import com.wirusmx.mybudget.view.View;
+
 public class Controller {
     private Model model;
     private View view;

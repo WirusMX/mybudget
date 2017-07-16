@@ -1,5 +1,7 @@
 package com.wirusmx.mybudget;
 
+import com.wirusmx.mybudget.view.View;
+
 /**
  * Main class of application. Contains <code>public static void main(String[] args)</code>
  * method and nothing else.
