@@ -1,5 +1,6 @@
 package com.wirusmx.mybudget;
 
+import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.view.View;
 
 /**

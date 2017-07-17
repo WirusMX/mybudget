@@ -59,7 +59,7 @@
                     <outputDirectory>${jar.output}</outputDirectory>
                     <archive>
                         <manifest>
-                            <addClassPath>true</addClassPath>
+                            <addClasspath>true</addClasspath>
                             <mainClass>com.wirusmx.mybudget.MainClass</mainClass>
                         </manifest>
                     </archive>
