@@ -1,6 +1,7 @@
 package com.wirusmx.mybudget.view;
 
 import com.wirusmx.mybudget.Controller;
+import com.wirusmx.mybudget.model.Note;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,36 +24,93 @@ public class View extends JFrame {
 
     public void init() {
         setTitle(FRAME_TITLE);
-        setBounds(0, 0, 800, 600);
+        setBounds(0, 0, 1024, 600);
+        setMinimumSize(new Dimension(900, 300));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("Файл");
+        addMainMenu();
 
-        JMenuItem newNoteMenu = new JMenuItem("Новая заметка");
-        newNoteMenu.addActionListener(new ActionListener() {
+        addControlPanel();
+
+        DefaultListModel<Note> noteDefaultListModel = new DefaultListModel<>();
+        JList<Note> notesList = new JList<>(noteDefaultListModel);
+        java.util.List<Note> notes = controller.getNotes();
+        for (Note n: notes){
+            noteDefaultListModel.addElement(n);
+        }
+
+        add(notesList);
+
+        setVisible(true);
+    }
+
+    private void addMainMenu() {
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu fileMenu = new JMenu("Файл");
+        JMenuItem newNoteMenuItem = new JMenuItem("Новый");
+        fileMenu.add(newNoteMenuItem);
+        menuBar.add(fileMenu);
+        getContentPane().add(menuBar, BorderLayout.NORTH);
+
+    }
+
+    private void addControlPanel() {
+        JMenuBar menuBar = new JMenuBar();
+
+        JButton newNoteButton = new JButton("+");
+        newNoteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new NoteEditDialog(thisView);
             }
         });
+        menuBar.add(newNoteButton);
 
-        JMenuItem exitMenu = new JMenuItem("Выход");
-        exitMenu.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                thisView.dispose();
-            }
-        });
+        menuBar.add(new JLabel(" "));
 
-        fileMenu.add(newNoteMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(exitMenu);
+        menuBar.add(new JButton("/"));
 
-        menuBar.add(fileMenu);
-        getContentPane().add(menuBar, BorderLayout.NORTH);
+        menuBar.add(new JLabel(" | "));
 
-        setVisible(true);
+        menuBar.add(new JLabel("За период:"));
+        JComboBox<String> periodTypeComboBox = new JComboBox<>();
+        periodTypeComboBox.addItem("Все");
+        periodTypeComboBox.addItem("Год");
+        periodTypeComboBox.addItem("Месяц");
+        periodTypeComboBox.addItem("День");
+        menuBar.add(periodTypeComboBox);
+
+        menuBar.add(new JComboBox<String>());
+
+        menuBar.add(new JLabel(" | "));
+
+        menuBar.add(new JLabel("Сортировка: "));
+        JComboBox<String> sortTypeComboBox = new JComboBox<>();
+        sortTypeComboBox.addItem("Дата");
+        sortTypeComboBox.addItem("Продукт");
+        sortTypeComboBox.addItem("Категория");
+        sortTypeComboBox.addItem("Цена");
+        sortTypeComboBox.addItem("Магазин");
+        sortTypeComboBox.addItem("Скидка");
+        menuBar.add(sortTypeComboBox);
+        JComboBox<String> sortOrderComboBox = new JComboBox<>();
+        sortOrderComboBox.addItem("Прямая (А->Я)");
+        sortOrderComboBox.addItem("Обратная (Я->А)");
+        menuBar.add(sortOrderComboBox);
+
+
+        menuBar.add(new JLabel(" | "));
+
+        menuBar.add(new JButton("Обновить"));
+
+        menuBar.add(new JLabel(" | "));
+
+
+        JTextField searchTextField = new JTextField("");
+        menuBar.add(searchTextField);
+        menuBar.add(new JButton("Поиск"));
+        getContentPane().add(menuBar, BorderLayout.SOUTH);
     }
 }

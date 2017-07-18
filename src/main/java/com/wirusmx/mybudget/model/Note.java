@@ -89,4 +89,9 @@ public class Note {
     public void update(){
         this.update = System.currentTimeMillis();
     }
+
+    @Override
+    public String toString() {
+        return item + " (" + shop.getTitle() + ", " + price + " руб.)";
+    }
 }

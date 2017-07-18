@@ -4,18 +4,15 @@ import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.util.List;
 
 public class NoteEditDialog extends JDialog {
 
-    private static final int SECOND_COL_X_POS = 140;
-    private static final int HEIGHT = 25;
-    private static final int LABEL_WIDTH = 130;
     private static final int FIRST_COL_X_POS = 10;
+    private static final int SECOND_COL_X_POS = 140;
+    private static final int ELEMENT_HEIGHT = 25;
+    private static final int LABEL_WIDTH = 130;
     private static final int Y0 = 20;
     private static final int DELTA_Y = 30;
 
@@ -39,7 +36,6 @@ public class NoteEditDialog extends JDialog {
     }
 
     private void init() {
-        System.out.println("wwww");
         setSize(500, 300);
         setLayout(null);
         setModal(true);
@@ -49,45 +45,63 @@ public class NoteEditDialog extends JDialog {
         int elementWidth = getWidth() - 20 - SECOND_COL_X_POS;
 
         JLabel label1 = new JLabel("Товар: ");
-        label1.setBounds(FIRST_COL_X_POS, Y0, LABEL_WIDTH, HEIGHT);
+        label1.setBounds(FIRST_COL_X_POS, Y0, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label1);
 
         final JTextField itemNameTextField = new JTextField(note.getItem());
-        itemNameTextField.setBounds(SECOND_COL_X_POS, Y0, elementWidth, HEIGHT);
+        itemNameTextField.setBounds(SECOND_COL_X_POS, Y0, elementWidth, ELEMENT_HEIGHT);
         add(itemNameTextField);
 
         JLabel label2 = new JLabel("Тип: ");
-        label2.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y, LABEL_WIDTH, HEIGHT);
+        label2.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label2);
 
         final JComboBox<SimpleData> itemTypeComboBox = new JComboBox<>();
         addValuesToComboBox(itemTypeComboBox, "item_types");
         selectValue(itemTypeComboBox, note.getType());
         itemTypeComboBox.addItemListener(new ComboBoxItemListener("item_types"));
-        itemTypeComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y, elementWidth, HEIGHT);
+        itemTypeComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y, elementWidth, ELEMENT_HEIGHT);
         add(itemTypeComboBox);
 
-        JLabel label3 = new JLabel("Стоимость: ");
-        label3.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 2, LABEL_WIDTH, HEIGHT);
+        JLabel label3 = new JLabel("Стоимость (руб.): ");
+        label3.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 2, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label3);
 
-        final JTextField itemPriceTextField = new JTextField(note.getPrice());
-        itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 2, elementWidth, HEIGHT);
+        final JTextField itemPriceTextField = new JTextField("" + note.getPrice());
+        itemPriceTextField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!itemPriceTextField.getText().matches("\\d+")){
+                    itemPriceTextField.setText(itemPriceTextField.getText().replaceAll("\\D", ""));
+                }
+
+                if (itemPriceTextField.getText().length() == 0){
+                    itemPriceTextField.setText("0");
+                }
+            }
+        });
+
+        itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 2, elementWidth, ELEMENT_HEIGHT);
         add(itemPriceTextField);
 
         JLabel label4 = new JLabel("Магазин: ");
-        label4.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 3, LABEL_WIDTH, HEIGHT);
+        label4.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 3, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label4);
 
         final JComboBox<SimpleData> shopComboBox = new JComboBox<>();
         addValuesToComboBox(shopComboBox, "shops");
         selectValue(shopComboBox, note.getShop());
         shopComboBox.addItemListener(new ComboBoxItemListener("shops"));
-        shopComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 3, elementWidth, HEIGHT);
+        shopComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 3, elementWidth, ELEMENT_HEIGHT);
         add(shopComboBox);
 
         JLabel label5 = new JLabel("Необходимость: ");
-        label5.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 4, LABEL_WIDTH, HEIGHT);
+        label5.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 4, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label5);
 
         final JComboBox<SimpleData> necessityLevelComboBox = new JComboBox<>();
@@ -95,11 +109,11 @@ public class NoteEditDialog extends JDialog {
         necessityLevelComboBox.addItem(new SimpleData(1, "Средняя"));
         necessityLevelComboBox.addItem(new SimpleData(2, "Низкая"));
         necessityLevelComboBox.setSelectedIndex(note.getNecessity().getId() % 3);
-        necessityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 4, elementWidth, HEIGHT);
+        necessityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 4, elementWidth, ELEMENT_HEIGHT);
         add(necessityLevelComboBox);
 
         JLabel label6 = new JLabel("Качество: ");
-        label6.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 5, LABEL_WIDTH, HEIGHT);
+        label6.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 5, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label6);
 
         final JComboBox<SimpleData> qualityLevelComboBox = new JComboBox<>();
@@ -108,11 +122,11 @@ public class NoteEditDialog extends JDialog {
         qualityLevelComboBox.addItem(new SimpleData(2, "Среднее"));
         qualityLevelComboBox.addItem(new SimpleData(3, "Низкое"));
         qualityLevelComboBox.setSelectedIndex(note.getQuality().getId() % 4);
-        qualityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 5, elementWidth, HEIGHT);
+        qualityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 5, elementWidth, ELEMENT_HEIGHT);
         add(qualityLevelComboBox);
 
         final JCheckBox sale = new JCheckBox("Со скидкой ");
-        sale.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 6, LABEL_WIDTH, HEIGHT);
+        sale.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 6, LABEL_WIDTH, ELEMENT_HEIGHT);
         sale.setSelected(note.isBySale());
         add(sale);
 
@@ -120,6 +134,10 @@ public class NoteEditDialog extends JDialog {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (itemNameTextField.getText().length() == 0){
+                    JOptionPane.showMessageDialog(thisDialog, "Укажите товар!", "", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 note.update(itemNameTextField.getText(), (SimpleData) itemTypeComboBox.getSelectedItem(),
                         Integer.parseInt(itemPriceTextField.getText()), (SimpleData)shopComboBox.getSelectedItem(),
                         (SimpleData) necessityLevelComboBox.getSelectedItem(), (SimpleData)qualityLevelComboBox.getSelectedItem(),

@@ -1,6 +1,7 @@
 package com.wirusmx.mybudget;
 
 import com.wirusmx.mybudget.model.Model;
+import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 import com.wirusmx.mybudget.view.View;
 
@@ -28,5 +29,9 @@ public class Controller {
 
     public int insertNewValue(String value, String table) {
         return model.insertNewValue(value, table);
+    }
+
+    public List<Note> getNotes() {
+        return model.getNotes();
     }
 }
