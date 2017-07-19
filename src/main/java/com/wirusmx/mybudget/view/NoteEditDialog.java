@@ -5,7 +5,7 @@ import com.wirusmx.mybudget.model.SimpleData;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.List;
+import java.util.Set;
 
 public class NoteEditDialog extends JDialog {
 
@@ -36,7 +36,7 @@ public class NoteEditDialog extends JDialog {
     }
 
     private void init() {
-        setSize(500, 300);
+        setSize(500, 320);
         setLayout(null);
         setModal(true);
         setLocationRelativeTo(null);
@@ -68,23 +68,7 @@ public class NoteEditDialog extends JDialog {
         add(label3);
 
         final JTextField itemPriceTextField = new JTextField("" + note.getPrice());
-        itemPriceTextField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (!itemPriceTextField.getText().matches("\\d+")){
-                    itemPriceTextField.setText(itemPriceTextField.getText().replaceAll("\\D", ""));
-                }
-
-                if (itemPriceTextField.getText().length() == 0){
-                    itemPriceTextField.setText("0");
-                }
-            }
-        });
+        itemPriceTextField.addFocusListener(new TextFieldFormatter("0"));
 
         itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 2, elementWidth, ELEMENT_HEIGHT);
         add(itemPriceTextField);
@@ -106,9 +90,8 @@ public class NoteEditDialog extends JDialog {
 
         final JComboBox<SimpleData> necessityLevelComboBox = new JComboBox<>();
         necessityLevelComboBox.addItem(new SimpleData(0, "Высокая"));
-        necessityLevelComboBox.addItem(new SimpleData(1, "Средняя"));
-        necessityLevelComboBox.addItem(new SimpleData(2, "Низкая"));
-        necessityLevelComboBox.setSelectedIndex(note.getNecessity().getId() % 3);
+        necessityLevelComboBox.addItem(new SimpleData(1, "Низкая"));
+        necessityLevelComboBox.setSelectedIndex(note.getNecessity().getId() % 2);
         necessityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 4, elementWidth, ELEMENT_HEIGHT);
         add(necessityLevelComboBox);
 
@@ -130,22 +113,43 @@ public class NoteEditDialog extends JDialog {
         sale.setSelected(note.isBySale());
         add(sale);
 
+        JLabel label7 = new JLabel("Дата: ");
+        label7.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 7, LABEL_WIDTH, ELEMENT_HEIGHT);
+        add(label7);
+
+        final JTextField dayTextField = new JTextField(note.getDay());
+        dayTextField.addFocusListener(new TextFieldFormatter(note.getDay(), "%02s"));
+        dayTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
+        add(dayTextField);
+
+        final JTextField monthTextField = new JTextField(note.getMonth());
+        monthTextField.addFocusListener(new TextFieldFormatter(note.getMonth()));
+        monthTextField.setBounds(SECOND_COL_X_POS + 35, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
+        add(monthTextField);
+
+        final JTextField yearTextField = new JTextField(note.getYear());
+        yearTextField.addFocusListener(new TextFieldFormatter(note.getYear()));
+        yearTextField.setBounds(SECOND_COL_X_POS + 70, Y0 + DELTA_Y * 7, 60, ELEMENT_HEIGHT);
+        add(yearTextField);
+
         JButton saveButton = new JButton("Сохранить");
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (itemNameTextField.getText().length() == 0){
+                if (itemNameTextField.getText().length() == 0) {
                     JOptionPane.showMessageDialog(thisDialog, "Укажите товар!", "", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
+
                 note.update(itemNameTextField.getText(), (SimpleData) itemTypeComboBox.getSelectedItem(),
                         Integer.parseInt(itemPriceTextField.getText()), (SimpleData)shopComboBox.getSelectedItem(),
                         (SimpleData) necessityLevelComboBox.getSelectedItem(), (SimpleData)qualityLevelComboBox.getSelectedItem(),
-                        sale.isSelected());
+                        sale.isSelected(), dayTextField.getText(), monthTextField.getText(), yearTextField.getText());
+
                 thisDialog.dispose();
             }
         });
-        saveButton.setBounds(50, Y0 + DELTA_Y * 6 + 50, 200, 30);
+        saveButton.setBounds(50, Y0 + DELTA_Y * 7 + 50, 200, 30);
         add(saveButton);
 
         JButton closeButton = new JButton("Закрыть");
@@ -156,7 +160,7 @@ public class NoteEditDialog extends JDialog {
                 thisDialog.dispose();
             }
         });
-        closeButton.setBounds(280, Y0 + DELTA_Y * 6 + 50, 200, 30);
+        closeButton.setBounds(280, Y0 + DELTA_Y * 7 + 50, 200, 30);
         add(closeButton);
 
         setVisible(true);
@@ -176,11 +180,13 @@ public class NoteEditDialog extends JDialog {
     }
 
     private void addValuesToComboBox(JComboBox<SimpleData> comboBox, String tableName) {
-        List<SimpleData> types = parent.getController().getItemTypes(tableName);
-        types.add(new SimpleData(-1, "Добавить новый"));
-        for (SimpleData d : types) {
+        comboBox.removeAllItems();
+        Set<SimpleData> values = parent.getController().getComboboxValues(tableName);
+        for (SimpleData d : values) {
             comboBox.addItem(d);
         }
+
+        comboBox.addItem(new SimpleData(-1, "Добавить новый"));
     }
 
     private class ComboBoxItemListener implements ItemListener {
@@ -217,6 +223,47 @@ public class NoteEditDialog extends JDialog {
                 cb.insertItemAt(new SimpleData(id, s), 0);
             }
             cb.setSelectedIndex(0);
+        }
+    }
+
+    private class TextFieldFormatter implements FocusListener {
+        private String defaultValue;
+        private String format;
+
+        public TextFieldFormatter(String defaultValue) {
+            this.defaultValue = defaultValue;
+            this.format = null;
+        }
+
+        public TextFieldFormatter(String defaultValue, String format) {
+            this.defaultValue = defaultValue;
+            this.format = format;
+        }
+
+        @Override
+        public void focusGained(FocusEvent e) {
+
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            if (!(e.getSource() instanceof JTextField)) {
+                return;
+            }
+
+            JTextField textField = (JTextField) e.getSource();
+
+            String text = textField.getText();
+
+            if (!text.matches("\\d+")) {
+                text = text.replaceAll("\\D", "");
+            }
+
+            if (text.length() == 0) {
+                text = defaultValue;
+            }
+
+            textField.setText(text);
         }
     }
 }

@@ -1,5 +1,9 @@
 package com.wirusmx.mybudget.model;
 
+import java.awt.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 public class Note {
     private final int id;
     private String item;
@@ -9,7 +13,9 @@ public class Note {
     private SimpleData necessity;
     private SimpleData quality;
     private boolean bySale;
-    private long update;
+    private String day;
+    private String month;
+    private String year;
 
     public Note() {
         this(
@@ -20,13 +26,17 @@ public class Note {
                 new SimpleData(-2, ""),
                 new SimpleData(0, ""),
                 new SimpleData(0, ""),
-                false
+                false,
+                "" + new GregorianCalendar().get(Calendar.DAY_OF_MONTH),
+                "" + new GregorianCalendar().get(Calendar.MONTH),
+                "" + new GregorianCalendar().get(Calendar.YEAR)
         );
 
     }
 
     public Note(int id, String item, SimpleData type, int price,
-                SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale) {
+                SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
+                String day, String month, String year) {
         this.id = id;
         this.item = item;
         this.type = type;
@@ -35,7 +45,9 @@ public class Note {
         this.necessity = necessity;
         this.quality = quality;
         this.bySale = bySale;
-        this.update = System.currentTimeMillis();
+        this.day = day;
+        this.month = month;
+        this.year = year;
     }
 
     public int getId() {
@@ -70,12 +82,21 @@ public class Note {
         return bySale;
     }
 
-    public long getUpdate() {
-        return update;
+    public String getDay() {
+        return day;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public String getYear() {
+        return year;
     }
 
     public void update(String item, SimpleData type, int price,
-                       SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale){
+                       SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
+                       String day, String month, String year) {
         this.item = item;
         this.type = type;
         this.price = price;
@@ -83,15 +104,22 @@ public class Note {
         this.necessity = necessity;
         this.quality = quality;
         this.bySale = bySale;
-        this.update = System.currentTimeMillis();
+        this.day = day;
+        this.month = month;
+        this.year = year;
     }
 
-    public void update(){
-        this.update = System.currentTimeMillis();
-    }
+
+
 
     @Override
     public String toString() {
-        return item + " (" + shop.getTitle() + ", " + price + " руб.)";
+        String result = item + " (" + shop.getTitle() + ", " + price + " руб., " + day + "." + month + "." + year + ")";
+        if (bySale){
+            result  += " со скидкой";
+        }
+        return result;
     }
+
+
 }

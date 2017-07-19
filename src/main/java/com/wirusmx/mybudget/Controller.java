@@ -6,6 +6,7 @@ import com.wirusmx.mybudget.model.SimpleData;
 import com.wirusmx.mybudget.view.View;
 
 import java.util.List;
+import java.util.Set;
 
 public class Controller {
     private Model model;
@@ -23,8 +24,8 @@ public class Controller {
         view.init();
     }
 
-    public List<SimpleData> getItemTypes(String tableName) {
-        return model.getItemTypes(tableName);
+    public Set<SimpleData> getComboboxValues(String tableName) {
+        return model.getComboBoxValues(tableName);
     }
 
     public int insertNewValue(String value, String table) {
@@ -33,5 +34,9 @@ public class Controller {
 
     public List<Note> getNotes() {
         return model.getNotes();
+    }
+
+    public void insertNote(Note note) {
+        model.insertNote(note);
     }
 }

@@ -13,6 +13,9 @@ public class View extends JFrame {
 
     private Controller controller;
     private View thisView = this;
+    private JList<Note> notesList;
+    private DefaultListModel<Note> noteDefaultListModel;
+    private JLabel statLabel = new JLabel();
 
     public View(Controller controller) {
         this.controller = controller;
@@ -33,16 +36,56 @@ public class View extends JFrame {
 
         addControlPanel();
 
-        DefaultListModel<Note> noteDefaultListModel = new DefaultListModel<>();
-        JList<Note> notesList = new JList<>(noteDefaultListModel);
-        java.util.List<Note> notes = controller.getNotes();
-        for (Note n: notes){
-            noteDefaultListModel.addElement(n);
-        }
+        noteDefaultListModel = new DefaultListModel<>();
+        notesList = new JList<>(noteDefaultListModel);
+        notesList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Note) {
+                    if (((Note) value).getNecessity().getId() == 1 && ((Note) value).isBySale()) {
+                        setBackground(Color.ORANGE);
+                    } else {
+                        if (((Note) value).isBySale()) {
+                            setBackground(Color.GREEN);
+                        } else {
+                            if (((Note) value).getNecessity().getId() == 1) {
+                                setBackground(Color.PINK);
+                            }
+                        }
+                    }
+                }
 
-        add(notesList);
+                return c;
+            }
+        });
+        update();
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(new JScrollPane(notesList), BorderLayout.CENTER);
+
+        centerPanel.add(statLabel, BorderLayout.SOUTH);
+
+        add(centerPanel);
 
         setVisible(true);
+    }
+
+    public void update() {
+        noteDefaultListModel.clear();
+
+        java.util.List<Note> notes = controller.getNotes();
+        int summ = 0;
+        int[] necSum = new int[2];
+
+        for (Note n : notes) {
+            noteDefaultListModel.addElement(n);
+            summ += n.getPrice();
+            necSum[n.getNecessity().getId()] += n.getPrice();
+        }
+
+        statLabel.setText("Итого: " + summ + "руб., из них " + necSum[0] + "руб. - высокой необходимости, " +
+                necSum[1] + "руб. - низкой необходимости");
     }
 
     private void addMainMenu() {
@@ -63,7 +106,12 @@ public class View extends JFrame {
         newNoteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new NoteEditDialog(thisView);
+                NoteEditDialog noteEditDialog = new NoteEditDialog(thisView);
+                Note note = noteEditDialog.getNote();
+                if (note != null) {
+                    controller.insertNote(note);
+                    update();
+                }
             }
         });
         menuBar.add(newNoteButton);

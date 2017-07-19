@@ -2,8 +2,7 @@ package com.wirusmx.mybudget.model;
 
 import com.wirusmx.mybudget.Controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Model {
     private Controller controller;
@@ -17,30 +16,51 @@ public class Model {
 
     }
 
-    public Controller getController() {
-        return controller;
+    private List<Note> notes = new ArrayList<>();
+    private Map<String, Set<SimpleData>> types;
+
+    {
+        types = new HashMap<>();
+        types.put("item_types", new TreeSet<>(new ComboBoxValuesComparator()));
+        types.put("shops", new TreeSet<>(new ComboBoxValuesComparator()));
+
+        for (String key: types.keySet()){
+            types.get(key).add(new SimpleData(0, "Прочее"));
+        }
+
     }
 
-    public List<SimpleData> getItemTypes(String tableName) {
-        ArrayList<SimpleData> result = new ArrayList<>();
-        result.add(new SimpleData(0, "Прочее"));
-        return result;
+    public Set<SimpleData> getComboBoxValues(String tableName) {
+        return Collections.unmodifiableSet(types.get(tableName));
     }
 
     public int insertNewValue(String value, String table) {
-        return -2;
+        int id = types.get(table).size();
+        types.get(table).add(new SimpleData(id, value));
+        return id;
     }
 
     public List<Note> getNotes() {
-        List<Note> result = new ArrayList<>();
-        result.add(new Note(0, "1", new SimpleData(0, "Прочее"), 1,
-                new SimpleData(0, "Прочее"), new SimpleData(0, "Прочее"), new SimpleData(0, "Прочее"), false));
 
-        result.add(new Note(1, "2", new SimpleData(0, "Прочее"), 2,
-                new SimpleData(0, "Прочее"), new SimpleData(0, "Прочее"), new SimpleData(0, "Прочее"), false));
-        result.add(new Note(2, "3", new SimpleData(0, "Прочее"), 3,
-                new SimpleData(0, "Прочее"), new SimpleData(0, "Прочее"), new SimpleData(0, "Прочее"), false));
+        return notes;
+    }
 
-        return result;
+    public void insertNote(Note note) {
+        notes.add(note);
+    }
+
+    private class ComboBoxValuesComparator implements Comparator<SimpleData>{
+        @Override
+        public int compare(SimpleData o1, SimpleData o2) {
+            if (o1.getId() == 0){
+                return -1;
+            }
+
+            if (o2.getId() == 0){
+                return 1;
+            }
+
+            return o1.getTitle().toLowerCase().compareTo(o2.getTitle().toLowerCase());
+        }
     }
 }
