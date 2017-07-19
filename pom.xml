@@ -4,9 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <repositories>
+        <repository>
+            <id>akathist-repository</id>
+            <name>Akathist Repository</name>
+            <url>http://www.9stmaryrd.com/maven</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>akathist-repository</id>
+            <name>Akathist Repository</name>
+            <url>http://www.9stmaryrd.com/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <groupId>com.wirusmx</groupId>
     <artifactId>mybudget</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -82,6 +97,48 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>${basedir}/target/application/${project.artifactId}-${project.version}.exe</outfile>
+                            <jar>${basedir}/target/application/${project.artifactId}-${project.version}.jar</jar>
+                            <errTitle>mybudget</errTitle>
+                            <classPath>
+                                <mainClass>com.wirusmx.mybudget.MainClass</mainClass>
+                                <addDependencies>true</addDependencies>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <jre>
+                                <minVersion>1.7.0</minVersion>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>${project.version}.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>Программа для блокировки счетов в соответствии со списком</fileDescription>
+                                <copyright>Copyright © 2017 WirusMX inc</copyright>
+                                <productVersion>${project.version}.0</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <companyName>WirusMX inc</companyName>
+                                <productName>MyBudget</productName>
+                                <internalName>MyBudget</internalName>
+                                <originalFilename>MyBudget.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
         </plugins>
     </build>
     
