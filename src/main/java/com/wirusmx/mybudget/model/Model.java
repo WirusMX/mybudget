@@ -6,9 +6,11 @@ import java.util.*;
 
 public class Model {
     private Controller controller;
+    private SQLDatabase database;
 
-    public Model(Controller controller) {
+    public Model(Controller controller, SQLDatabase database) {
         this.controller = controller;
+        this.database = database;
         init();
     }
 
@@ -31,22 +33,25 @@ public class Model {
     }
 
     public Set<SimpleData> getComboBoxValues(String tableName) {
-        return Collections.unmodifiableSet(types.get(tableName));
+        return database.getComboBoxValues(tableName);
     }
 
     public int insertNewValue(String value, String table) {
-        int id = types.get(table).size();
-        types.get(table).add(new SimpleData(id, value));
-        return id;
+
+        return database.insertNewValue(value, table);
     }
 
     public List<Note> getNotes() {
 
-        return notes;
+        return database.getNotes();
     }
 
     public void insertNote(Note note) {
-        notes.add(note);
+        database.insertNote(note);
+    }
+
+    public void updateNote(Note note) {
+
     }
 
     private class ComboBoxValuesComparator implements Comparator<SimpleData>{

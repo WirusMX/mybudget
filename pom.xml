@@ -29,6 +29,7 @@
         <jar.output>${basedir}/target/application</jar.output>
         <java.version>1.7</java.version>
         <main.class>com.wirusmx.mybudget.MainClass</main.class>
+        <application.title>MyBudget</application.title>
     </properties>
 
     <dependencies>
@@ -112,9 +113,9 @@
                         </goals>
                         <configuration>
                             <headerType>gui</headerType>
-                            <outfile>${jar.output}/${project.artifactId}-${project.version}.exe</outfile>
+                            <outfile>${jar.output}/${application.title}.exe</outfile>
                             <jar>${jar.output}/${project.artifactId}-${project.version}.jar</jar>
-                            <errTitle>mybudget</errTitle>
+                            <errTitle>${application.title}</errTitle>
                             <classPath>
                                 <mainClass>${main.class}</mainClass>
                                 <addDependencies>true</addDependencies>
@@ -127,13 +128,13 @@
                                 <fileVersion>${project.version}.0</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
                                 <fileDescription>Программа ведения домашнего бюджета</fileDescription>
-                                <copyright>Copyright © 2017 WirusMX inc</copyright>
+                                <copyright>Copyright © 2017 WirusMX</copyright>
                                 <productVersion>${project.version}.0</productVersion>
                                 <txtProductVersion>${project.version}</txtProductVersion>
-                                <companyName>WirusMX inc</companyName>
-                                <productName>MyBudget</productName>
-                                <internalName>MyBudget</internalName>
-                                <originalFilename>MyBudget.exe</originalFilename>
+                                <companyName>WirusMX</companyName>
+                                <productName>${application.title}</productName>
+                                <internalName>${application.title}</internalName>
+                                <originalFilename>${application.title}.exe</originalFilename>
                             </versionInfo>
                         </configuration>
                     </execution>

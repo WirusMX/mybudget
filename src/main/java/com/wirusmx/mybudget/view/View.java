@@ -7,9 +7,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 public class View extends JFrame {
-    private static final String FRAME_TITLE = "СЕМЕЙНЫЙ БЮДЖЕТ v1.0";
+    private static final String FRAME_TITLE = "СЕМЕЙНЫЙ БЮДЖЕТ";
 
     private Controller controller;
     private View thisView = this;
@@ -84,41 +85,50 @@ public class View extends JFrame {
             necSum[n.getNecessity().getId()] += n.getPrice();
         }
 
-        statLabel.setText("Итого: " + summ + "руб., из них " + necSum[0] + "руб. - высокой необходимости, " +
-                necSum[1] + "руб. - низкой необходимости");
+        statLabel.setText("Итого: " + summ + " руб., из них " + necSum[0] + " руб. - высокой необходимости, " +
+                necSum[1] + " руб. - низкой необходимости");
     }
 
     private void addMainMenu() {
         JMenuBar menuBar = new JMenuBar();
 
         JMenu fileMenu = new JMenu("Файл");
-        JMenuItem newNoteMenuItem = new JMenuItem("Новый");
-        fileMenu.add(newNoteMenuItem);
-        menuBar.add(fileMenu);
-        getContentPane().add(menuBar, BorderLayout.NORTH);
 
+        JMenuItem newNoteMenuItem = new JMenuItem("Новая запись");
+        newNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        newNoteMenuItem.addActionListener(new AddNewNoteActionListener());
+
+        fileMenu.add(newNoteMenuItem);
+
+        fileMenu.addSeparator();
+
+        JMenuItem exitMenuItem = new JMenuItem("Выход");
+        exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.ALT_MASK));
+        exitMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                thisView.dispose();
+            }
+        });
+        fileMenu.add(exitMenuItem);
+
+        menuBar.add(fileMenu);
+
+        getContentPane().add(menuBar, BorderLayout.NORTH);
     }
 
     private void addControlPanel() {
         JMenuBar menuBar = new JMenuBar();
 
         JButton newNoteButton = new JButton("+");
-        newNoteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                NoteEditDialog noteEditDialog = new NoteEditDialog(thisView);
-                Note note = noteEditDialog.getNote();
-                if (note != null) {
-                    controller.insertNote(note);
-                    update();
-                }
-            }
-        });
+        newNoteButton.addActionListener(new AddNewNoteActionListener());
         menuBar.add(newNoteButton);
 
         menuBar.add(new JLabel(" "));
 
-        menuBar.add(new JButton("/"));
+        JButton editButton = new JButton("/");
+        editButton.addActionListener(new EditNoteActionListener());
+        menuBar.add(editButton);
 
         menuBar.add(new JLabel(" | "));
 
@@ -160,5 +170,30 @@ public class View extends JFrame {
         menuBar.add(searchTextField);
         menuBar.add(new JButton("Поиск"));
         getContentPane().add(menuBar, BorderLayout.SOUTH);
+    }
+
+    private class AddNewNoteActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            NoteEditDialog noteEditDialog = new NoteEditDialog(thisView);
+            Note note = noteEditDialog.getNote();
+            if (note != null) {
+                controller.insertNote(note);
+                update();
+            }
+        }
+    }
+
+    private class EditNoteActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Note note = notesList.getSelectedValue();
+            NoteEditDialog noteEditDialog = new NoteEditDialog(thisView, note);
+            note = noteEditDialog.getNote();
+            if (note != null) {
+                controller.updateNote(note);
+                update();
+            }
+        }
     }
 }

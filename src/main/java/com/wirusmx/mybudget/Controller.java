@@ -39,4 +39,8 @@ public class Controller {
     public void insertNote(Note note) {
         model.insertNote(note);
     }
+
+    public void updateNote(Note note) {
+        model.updateNote(note);
+    }
 }
