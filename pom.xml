@@ -157,6 +157,7 @@
                             <outfile>${jar.output}/${application.title}.exe</outfile>
                             <jar>${jar.output}/${application.title}.jar</jar>
                             <errTitle>${application.title}</errTitle>
+                            <icon>img/favicon.ico</icon>
                             <classPath>
                                 <mainClass>${main.class}</mainClass>
                                 <addDependencies>true</addDependencies>
