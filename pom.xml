@@ -26,10 +26,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jar.output>${basedir}/target/application</jar.output>
         <java.version>1.7</java.version>
         <main.class>com.wirusmx.mybudget.MainClass</main.class>
         <application.title>MyBudget</application.title>
+        <jar.output>${basedir}/target/${application.title}${project.version}</jar.output>
     </properties>
 
     <dependencies>
@@ -60,6 +60,7 @@
     </dependencies>
 
     <build>
+        <finalName>${application.title}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -78,6 +79,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>${main.class}</mainClass>
                         </manifest>
                     </archive>
@@ -102,6 +104,45 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${jar.output}/img</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>img</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-configuration</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${jar.output}/conf</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>conf</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
                 <executions>
@@ -114,7 +155,7 @@
                         <configuration>
                             <headerType>gui</headerType>
                             <outfile>${jar.output}/${application.title}.exe</outfile>
-                            <jar>${jar.output}/${project.artifactId}-${project.version}.jar</jar>
+                            <jar>${jar.output}/${application.title}.jar</jar>
                             <errTitle>${application.title}</errTitle>
                             <classPath>
                                 <mainClass>${main.class}</mainClass>
@@ -140,7 +181,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
         </plugins>
     </build>

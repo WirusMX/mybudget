@@ -118,7 +118,7 @@ public class NoteEditDialog extends JDialog {
         add(label7);
 
         final JTextField dayTextField = new JTextField(note.getDay());
-        dayTextField.addFocusListener(new TextFieldFormatter(note.getDay(), "%02s"));
+        dayTextField.addFocusListener(new TextFieldFormatter(note.getDay()));
         dayTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
         add(dayTextField);
 
@@ -181,7 +181,7 @@ public class NoteEditDialog extends JDialog {
 
     private void addValuesToComboBox(JComboBox<SimpleData> comboBox, String tableName) {
         comboBox.removeAllItems();
-        Set<SimpleData> values = parent.getController().getComboboxValues(tableName);
+        Set<SimpleData> values = parent.getController().getComboBoxValues(tableName);
         for (SimpleData d : values) {
             comboBox.addItem(d);
         }
@@ -192,7 +192,7 @@ public class NoteEditDialog extends JDialog {
     private class ComboBoxItemListener implements ItemListener {
         private String table;
 
-        public ComboBoxItemListener(String table) {
+        ComboBoxItemListener(String table) {
             this.table = table;
         }
 
@@ -228,16 +228,9 @@ public class NoteEditDialog extends JDialog {
 
     private class TextFieldFormatter implements FocusListener {
         private String defaultValue;
-        private String format;
 
-        public TextFieldFormatter(String defaultValue) {
+        TextFieldFormatter(String defaultValue) {
             this.defaultValue = defaultValue;
-            this.format = null;
-        }
-
-        public TextFieldFormatter(String defaultValue, String format) {
-            this.defaultValue = defaultValue;
-            this.format = format;
         }
 
         @Override

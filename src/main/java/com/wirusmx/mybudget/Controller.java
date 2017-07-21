@@ -24,7 +24,7 @@ public class Controller {
         view.init();
     }
 
-    public Set<SimpleData> getComboboxValues(String tableName) {
+    public Set<SimpleData> getComboBoxValues(String tableName) {
         return model.getComboBoxValues(tableName);
     }
 
