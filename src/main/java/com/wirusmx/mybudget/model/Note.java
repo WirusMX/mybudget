@@ -1,6 +1,5 @@
 package com.wirusmx.mybudget.model;
 
-import java.awt.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -45,8 +44,8 @@ public class Note {
         this.necessity = necessity;
         this.quality = quality;
         this.bySale = bySale;
-        this.day = day;
-        this.month = month;
+        this.day = day.length() == 2 ? day : "0" + day;
+        this.month = month.length() == 2 ? month : "0" + month;
         this.year = year;
     }
 
@@ -104,19 +103,17 @@ public class Note {
         this.necessity = necessity;
         this.quality = quality;
         this.bySale = bySale;
-        this.day = day;
-        this.month = month;
+        this.day = day.length() == 2 ? day : "0" + day;
+        this.month = month.length() == 2 ? month : "0" + month;
         this.year = year;
     }
-
-
 
 
     @Override
     public String toString() {
         String result = item + " (" + shop.getTitle() + ", " + price + " руб., " + day + "." + month + "." + year + ")";
-        if (bySale){
-            result  += " со скидкой";
+        if (bySale) {
+            result += " со скидкой";
         }
         return result;
     }

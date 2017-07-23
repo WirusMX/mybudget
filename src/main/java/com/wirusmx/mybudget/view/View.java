@@ -12,6 +12,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class View extends JFrame {
     private Controller controller;
@@ -28,6 +30,9 @@ public class View extends JFrame {
             new TitlesComparator(MyComparator.DIRECT_ORDER)
     };
     private int selectedComparator = 0;
+
+    private int selectedPeriodType = PeriodTypes.ALL;
+
 
     public View(Controller controller, String applicationTitle, String applicationVersion) {
         this.controller = controller;
@@ -150,14 +155,14 @@ public class View extends JFrame {
 
         menuBar.add(new JLabel("За период:"));
         JComboBox<SimpleData> periodTypeComboBox = new JComboBox<>();
-        periodTypeComboBox.addItem(new SimpleData(0, "Все"));
-        periodTypeComboBox.addItem(new SimpleData(1, "Год"));
-        periodTypeComboBox.addItem(new SimpleData(2, "Месяц"));
-        periodTypeComboBox.addItem(new SimpleData(3, "День"));
-        periodTypeComboBox.setSelectedIndex(2);
+        periodTypeComboBox.addItem(new SimpleData(PeriodTypes.ALL, "Все"));
+        periodTypeComboBox.addItem(new SimpleData(PeriodTypes.YEAR, "Год"));
+        periodTypeComboBox.addItem(new SimpleData(PeriodTypes.MONTH, "Месяц"));
+        periodTypeComboBox.addItem(new SimpleData(PeriodTypes.DAY, "День"));
+        periodTypeComboBox.setSelectedIndex(selectedPeriodType);
         menuBar.add(periodTypeComboBox);
 
-        JComboBox<SimpleData> periodComboBox = new JComboBox<>();
+        JComboBox<String> periodComboBox = new JComboBox<>();
         periodTypeComboBox.addItemListener(new PeriodTypeItemListener(periodComboBox));
         menuBar.add(periodComboBox);
 
@@ -165,18 +170,20 @@ public class View extends JFrame {
 
         menuBar.add(new JLabel("Сортировка: "));
         JComboBox<SimpleData> sortTypeComboBox = new JComboBox<>();
-        sortTypeComboBox.addItem(new SimpleData(0, "Дата"));
-        sortTypeComboBox.addItem(new SimpleData(1, "Продукт"));
-       // sortTypeComboBox.addItem(new SimpleData(2, "Категория"));
-       // sortTypeComboBox.addItem(new SimpleData(3, "Цена"));
-        //sortTypeComboBox.addItem(new SimpleData(4, "Магазин"));
-       // sortTypeComboBox.addItem(new SimpleData(5, "Скидка"));
+        sortTypeComboBox.addItem(new SimpleData(SortTypes.DATE, "Дата"));
+        sortTypeComboBox.addItem(new SimpleData(SortTypes.ITEM, "Продукт"));
+        /*
+        sortTypeComboBox.addItem(new SimpleData(SortTypes.TYPE, "Категория"));
+        sortTypeComboBox.addItem(new SimpleData(SortTypes.PRICE, "Цена"));
+        sortTypeComboBox.addItem(new SimpleData(SortTypes.SHOP, "Магазин"));
+        sortTypeComboBox.addItem(new SimpleData(SortTypes.BY_SALE, "Скидка"));
+        */
         sortTypeComboBox.addItemListener(new SortTypeItemListener());
         menuBar.add(sortTypeComboBox);
 
         JComboBox<SimpleData> sortOrderComboBox = new JComboBox<>();
-        sortOrderComboBox.addItem(new SimpleData(1, "Прямая (А->Я)"));
-        sortOrderComboBox.addItem(new SimpleData(-1, "Обратная (Я->А)"));
+        sortOrderComboBox.addItem(new SimpleData(MyComparator.DIRECT_ORDER, "Прямая (А->Я)"));
+        sortOrderComboBox.addItem(new SimpleData(MyComparator.REVERSE_ORDER, "Обратная (Я->А)"));
         sortOrderComboBox.addItemListener(new SortOrderItemListener());
         menuBar.add(sortOrderComboBox);
 
@@ -259,9 +266,9 @@ public class View extends JFrame {
 
     private class PeriodTypeItemListener implements ItemListener {
 
-        private JComboBox<SimpleData> periodComboBox;
+        private JComboBox<String> periodComboBox;
 
-        public PeriodTypeItemListener(JComboBox<SimpleData> periodComboBox) {
+        public PeriodTypeItemListener(JComboBox<String> periodComboBox) {
             this.periodComboBox = periodComboBox;
         }
 
@@ -272,20 +279,32 @@ public class View extends JFrame {
             }
 
             JComboBox<SimpleData> periodTypeComboBox = (JComboBox) e.getSource();
+            Set<String> values = new TreeSet<>();
             switch (((SimpleData) periodTypeComboBox.getSelectedItem()).getId()) {
-                case 0: {
+                case PeriodTypes.ALL: {
                     periodComboBox.setEnabled(false);
                     break;
                 }
-                case 1: {
-
+                case PeriodTypes.YEAR: {
+                    periodComboBox.setEnabled(true);
+                    values = controller.getYears();
+                    break;
                 }
-                case 2: {
-
+                case PeriodTypes.MONTH: {
+                    periodComboBox.setEnabled(true);
+                    values = controller.getMonths();
+                    break;
                 }
-                case 3: {
+                case PeriodTypes.DAY: {
+                    values = controller.getDays();
                     periodComboBox.setEnabled(true);
                 }
+            }
+
+            periodComboBox.removeAllItems();
+
+            for (String s: values){
+                periodComboBox.addItem(s);
             }
         }
     }
@@ -353,5 +372,21 @@ public class View extends JFrame {
         public void actionPerformed(ActionEvent e) {
             update();
         }
+    }
+
+    private static class PeriodTypes{
+        public static final int ALL = 0;
+        public static final int YEAR = 1;
+        public static final int MONTH = 2;
+        public static final int DAY = 3;
+    }
+
+    private static class SortTypes{
+        public static final int DATE = 0;
+        public static final int ITEM = 1;
+        public static final int TYPE = 2;
+        public static final int PRICE = 3;
+        public static final int SHOP = 4;
+        public static final int BY_SALE = 5;
     }
 }

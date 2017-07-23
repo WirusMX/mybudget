@@ -118,6 +118,55 @@ public class Model {
                 + "'" + note.getYear() + "');");
     }
 
+    public Set<String> getYears(){
+        List<String> temp = new ArrayList<>();
+
+        try {
+            temp = template.query("SELECT year FROM product;", new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                    return resultSet.getString("year");
+                }
+            });
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return new TreeSet<>(temp);
+    }
+
+    public Set<String> getMonths(){
+        List<String> temp = new ArrayList<>();
+
+        try {
+            temp = template.query("SELECT month, year FROM product;", new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                    return resultSet.getString("year") + "." + resultSet.getString("month") ;
+                }
+            });
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return new TreeSet<>(temp);
+    }
+
+    public Set<String> getDays(){
+        List<String> temp = new ArrayList<>();
+
+        try {
+            temp = template.query("SELECT day, month, year FROM product;", new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                    return resultSet.getString("year") + "." + resultSet.getString("month")
+                            + "." + resultSet.getString("day") ;
+                }
+            });
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return new TreeSet<>(temp);
+    }
+
     private class ComboBoxValuesComparator implements Comparator<SimpleData> {
         @Override
         public int compare(SimpleData o1, SimpleData o2) {

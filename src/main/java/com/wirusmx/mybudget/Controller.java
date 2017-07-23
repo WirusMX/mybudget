@@ -43,4 +43,16 @@ public class Controller {
     public void updateNote(Note note) {
         model.updateNote(note);
     }
+
+    public Set<String> getYears() {
+        return model.getYears();
+    }
+
+    public Set<String> getMonths() {
+        return model.getMonths();
+    }
+
+    public Set<String> getDays() {
+        return model.getDays();
+    }
 }
