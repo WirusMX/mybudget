@@ -16,11 +16,12 @@ public class Controller {
         this.model = model;
     }
 
-    public void setView(View view) {
+    void setView(View view) {
         this.view = view;
     }
 
-    public void startApplication() {
+    void startApplication() {
+        model.init();
         view.init();
     }
 
@@ -33,7 +34,11 @@ public class Controller {
     }
 
     public List<Note> getNotes() {
-        return model.getNotes();
+        return model.getNotes("");
+    }
+
+    public List<Note> getNotes(String period) {
+        return model.getNotes(period);
     }
 
     public void insertNote(Note note) {
@@ -55,4 +60,14 @@ public class Controller {
     public Set<String> getDays() {
         return model.getDays();
     }
+
+    public String getUserSettingsValue(String key, String defaultValue){
+        return model.getUserSettingsValue(key, defaultValue);
+    }
+
+    public void setUserSettingsValue(String key, String value) {
+        model.setUserSettingsValue(key, value);
+    }
+
+
 }

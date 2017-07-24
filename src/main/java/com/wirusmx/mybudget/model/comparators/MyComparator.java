@@ -2,6 +2,11 @@ package com.wirusmx.mybudget.model.comparators;
 
 import java.util.Comparator;
 
+/**
+ * Notes comparator base class.
+ *
+ * @param <Note>
+ */
 public abstract class MyComparator<Note> implements Comparator<Note> {
 
     public static final int DIRECT_ORDER = 1;
@@ -13,6 +18,14 @@ public abstract class MyComparator<Note> implements Comparator<Note> {
         this.order = order;
     }
 
+    /**
+     * Is used for checking compare order.
+     *
+     * @param order - compare order. Positive value corresponds to direct order,
+     *              negative value - reverse order. There are default constants
+     *              for this parameter: <code>MyComparator.DIRECT_ORDER</code>
+     *              and <code>MyComparator.REVERSE_ORDER</code>.
+     */
     public void setOrder(int order) {
         this.order = order;
     }

@@ -134,6 +134,9 @@
                             <resources>
                                 <resource>
                                     <directory>conf</directory>
+                                    <excludes>
+                                        <exclude>user_settings.properties</exclude>
+                                    </excludes>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
@@ -185,5 +188,5 @@
 
         </plugins>
     </build>
-    
+
 </project>

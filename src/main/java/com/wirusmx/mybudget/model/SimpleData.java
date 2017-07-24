@@ -18,7 +18,7 @@ public class SimpleData {
         return id;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
 
@@ -29,8 +29,7 @@ public class SimpleData {
 
         SimpleData that = (SimpleData) o;
 
-        if (id != that.id) return false;
-        return title != null ? title.equals(that.title) : that.title == null;
+        return id == that.id && (title != null ? title.equals(that.title) : that.title == null);
 
     }
 

@@ -2,7 +2,10 @@ package com.wirusmx.mybudget.model.comparators;
 
 import com.wirusmx.mybudget.model.Note;
 
-public class TitlesComparator extends MyComparator<Note>{
+/**
+ * Compare Notes by titles.
+ */
+public class TitlesComparator extends MyComparator<Note> {
     public TitlesComparator(int order) {
         super(order);
     }

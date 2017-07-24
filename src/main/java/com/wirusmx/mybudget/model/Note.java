@@ -33,9 +33,9 @@ public class Note {
 
     }
 
-    public Note(int id, String item, SimpleData type, int price,
-                SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
-                String day, String month, String year) {
+    Note(int id, String item, SimpleData type, int price,
+         SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
+         String day, String month, String year) {
         this.id = id;
         this.item = item;
         this.type = type;
@@ -49,7 +49,7 @@ public class Note {
         this.year = year;
     }
 
-    public int getId() {
+    int getId() {
         return id;
     }
 

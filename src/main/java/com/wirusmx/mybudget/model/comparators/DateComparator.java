@@ -2,7 +2,10 @@ package com.wirusmx.mybudget.model.comparators;
 
 import com.wirusmx.mybudget.model.Note;
 
-public class DateComparator extends MyComparator<Note>{
+/**
+ * Compare Notes by dates.
+ */
+public class DateComparator extends MyComparator<Note> {
     public DateComparator(int order) {
         super(order);
     }

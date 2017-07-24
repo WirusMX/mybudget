@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.util.Set;
 
-public class NoteEditDialog extends JDialog {
+class NoteEditDialog extends JDialog {
 
     private static final int FIRST_COL_X_POS = 10;
     private static final int SECOND_COL_X_POS = 140;
@@ -21,17 +21,17 @@ public class NoteEditDialog extends JDialog {
     private View parent;
     private Note note;
 
-    public NoteEditDialog(View parent) {
+    NoteEditDialog(View parent) {
         this(parent, new Note());
     }
 
-    public NoteEditDialog(View parent, Note note) {
+    NoteEditDialog(View parent, Note note) {
         this.parent = parent;
         this.note = note;
         init();
     }
 
-    public Note getNote() {
+    Note getNote() {
         return note;
     }
 
@@ -196,6 +196,7 @@ public class NoteEditDialog extends JDialog {
             this.table = table;
         }
 
+        @SuppressWarnings({"unchecked"})
         @Override
         public void itemStateChanged(ItemEvent e) {
             if (!(e.getSource() instanceof JComboBox)) {

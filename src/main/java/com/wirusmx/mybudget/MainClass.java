@@ -15,28 +15,31 @@ import java.util.Properties;
  */
 public class MainClass {
     public static void main(String[] args) {
-        Controller controller = new Controller();
-
-        ApplicationContext context = new FileSystemXmlApplicationContext("conf/spring_config.xml");
-        Model model = (Model) context.getBean("sql_model");
-
-        Properties properties = new Properties();
-        String applicationTitle = "MyBudget";
-        String applicationVersion = "";
-
         try {
-            properties.load(new FileInputStream("conf/config.properties"));
-            applicationTitle = properties.getProperty("application.title", applicationTitle);
-            applicationVersion = properties.getProperty("application.version", applicationVersion);
-        } catch (IOException e) {
-            e.printStackTrace();
+            Controller controller = new Controller();
+
+            ApplicationContext context = new FileSystemXmlApplicationContext("conf/spring_config.xml");
+            Model model = (Model) context.getBean("sql_model");
+
+            Properties properties = new Properties();
+            String applicationTitle = "MyBudget";
+            String applicationVersion = "";
+
+            try {
+                properties.load(new FileInputStream("conf/config.properties"));
+                applicationTitle = properties.getProperty("application.title", applicationTitle);
+                applicationVersion = properties.getProperty("application.version", applicationVersion);
+            } catch (IOException e) {
+                DefaultExceptionHandler.handleException(e);
+            }
+
+            View view = new View(controller, applicationTitle, applicationVersion);
+
+            controller.setModel(model);
+            controller.setView(view);
+            controller.startApplication();
+        } catch (Exception ex){
+            DefaultExceptionHandler.handleException(ex);
         }
-
-        View view = new View(controller, applicationTitle, applicationVersion);
-
-        controller.setModel(model);
-        controller.setView(view);
-        controller.startApplication();
-
     }
 }

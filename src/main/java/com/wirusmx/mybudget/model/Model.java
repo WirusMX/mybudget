@@ -4,20 +4,26 @@ import com.wirusmx.mybudget.DefaultExceptionHandler;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 public class Model {
+    private static final String USER_SETTINGS_PROPERTIES_PATH = "conf/user_settings.properties";
+
     private JdbcTemplate template;
 
+    private Properties userSettings;
 
     public Model(JdbcTemplate template) {
         this.template = template;
-        init();
     }
 
-    private void init() {
+    public void init() {
         template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
                 "itemTitle TEXT, typeID INTEGER, price INTEGER, shopID INTEGER, " +
                 "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
@@ -30,6 +36,15 @@ public class Model {
         template.execute("CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "title TEXT);");
         template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее')");
+
+        userSettings = new Properties();
+        if (new java.io.File(USER_SETTINGS_PROPERTIES_PATH).exists()) {
+            try {
+                userSettings.load(new FileInputStream(USER_SETTINGS_PROPERTIES_PATH));
+            } catch (IOException e) {
+                DefaultExceptionHandler.handleException(e);
+            }
+        }
     }
 
     public Set<SimpleData> getComboBoxValues(String tableName) {
@@ -52,8 +67,7 @@ public class Model {
 
     public int insertNewValue(String value, String table) {
         template.execute("INSERT OR REPLACE INTO " + table + " (title) VALUES ('" + value + "');");
-        Integer id = template.queryForObject("SELECT id from " + table + " WHERE title LIKE '" + value + "';", Integer.class);
-        return id;
+        return template.queryForObject("SELECT id from " + table + " WHERE title LIKE '" + value + "';", Integer.class);
     }
 
     public void insertNote(Note note) {
@@ -73,12 +87,27 @@ public class Model {
 
     }
 
-    public List<Note> getNotes() {
+    public List<Note> getNotes(String period) {
         List<Note> result = new ArrayList<>();
+
+        if (!("".equals(period))){
+            String[] parts = period.split("\\D");
+            if (parts.length >= 1){
+                period = "WHERE year LIKE '" + parts[0] + "' ";
+            }
+
+            if (parts.length >= 2){
+                period += "AND month LIKE '" + parts[1] + "' ";
+            }
+
+            if (parts.length == 3){
+                period += "AND day LIKE '" + parts[2] + "' ";
+            }
+        }
 
         try {
             result = template.query("SELECT * FROM (product INNER JOIN shops ON product.shopID = shops.id) " +
-                    "INNER JOIN item_types ON product.typeID=item_types.id;", new RowMapper<Note>() {
+                    "INNER JOIN item_types ON product.typeID=item_types.id " + period + ";", new RowMapper<Note>() {
                 @Override
                 public Note mapRow(ResultSet resultSet, int i) throws SQLException {
                     return new Note(resultSet.getInt("id"),
@@ -118,7 +147,7 @@ public class Model {
                 + "'" + note.getYear() + "');");
     }
 
-    public Set<String> getYears(){
+    public Set<String> getYears() {
         List<String> temp = new ArrayList<>();
 
         try {
@@ -134,14 +163,14 @@ public class Model {
         return new TreeSet<>(temp);
     }
 
-    public Set<String> getMonths(){
+    public Set<String> getMonths() {
         List<String> temp = new ArrayList<>();
 
         try {
             temp = template.query("SELECT month, year FROM product;", new RowMapper<String>() {
                 @Override
                 public String mapRow(ResultSet resultSet, int i) throws SQLException {
-                    return resultSet.getString("year") + "." + resultSet.getString("month") ;
+                    return resultSet.getString("year") + "." + resultSet.getString("month");
                 }
             });
         } catch (Exception ex) {
@@ -150,7 +179,7 @@ public class Model {
         return new TreeSet<>(temp);
     }
 
-    public Set<String> getDays(){
+    public Set<String> getDays() {
         List<String> temp = new ArrayList<>();
 
         try {
@@ -158,13 +187,30 @@ public class Model {
                 @Override
                 public String mapRow(ResultSet resultSet, int i) throws SQLException {
                     return resultSet.getString("year") + "." + resultSet.getString("month")
-                            + "." + resultSet.getString("day") ;
+                            + "." + resultSet.getString("day");
                 }
             });
         } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
         return new TreeSet<>(temp);
+    }
+
+    public String getUserSettingsValue(String key, String defaultValue) {
+        return userSettings.getProperty(key, defaultValue);
+    }
+
+    public void setUserSettingsValue(String key, String value) {
+        userSettings.setProperty(key, value);
+        saveUserSettings();
+    }
+
+    private void saveUserSettings() {
+        try {
+            userSettings.store(new FileOutputStream(USER_SETTINGS_PROPERTIES_PATH), "");
+        } catch (IOException e) {
+            DefaultExceptionHandler.handleException(e);
+        }
     }
 
     private class ComboBoxValuesComparator implements Comparator<SimpleData> {
