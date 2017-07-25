@@ -1,13 +1,17 @@
 package com.wirusmx.mybudget.view;
 
+import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Set;
 
-class NoteEditDialog extends JDialog {
+public class NoteEditDialog extends JDialog {
 
     private static final int FIRST_COL_X_POS = 10;
     private static final int SECOND_COL_X_POS = 140;
@@ -19,19 +23,21 @@ class NoteEditDialog extends JDialog {
     private final JDialog thisDialog = this;
 
     private View parent;
+    private final Controller controller;
     private Note note;
 
-    NoteEditDialog(View parent) {
-        this(parent, new Note());
+    public NoteEditDialog(View parent, Controller controller) {
+        this(parent, controller, new Note());
     }
 
-    NoteEditDialog(View parent, Note note) {
+    public NoteEditDialog(View parent, Controller controller, Note note) {
         this.parent = parent;
         this.note = note;
+        this.controller = controller;
         init();
     }
 
-    Note getNote() {
+    public Note getNote() {
         return note;
     }
 
@@ -68,7 +74,7 @@ class NoteEditDialog extends JDialog {
         add(label3);
 
         final JTextField itemPriceTextField = new JTextField("" + note.getPrice());
-        itemPriceTextField.addFocusListener(new TextFieldFormatter("0"));
+        itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener("0"));
 
         itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 2, elementWidth, ELEMENT_HEIGHT);
         add(itemPriceTextField);
@@ -118,17 +124,17 @@ class NoteEditDialog extends JDialog {
         add(label7);
 
         final JTextField dayTextField = new JTextField(note.getDay());
-        dayTextField.addFocusListener(new TextFieldFormatter(note.getDay()));
+        dayTextField.addFocusListener(controller.getNumericTextFieldFocusListener(note.getDay()));
         dayTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
         add(dayTextField);
 
         final JTextField monthTextField = new JTextField(note.getMonth());
-        monthTextField.addFocusListener(new TextFieldFormatter(note.getMonth()));
+        monthTextField.addFocusListener(controller.getNumericTextFieldFocusListener(note.getMonth()));
         monthTextField.setBounds(SECOND_COL_X_POS + 35, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
         add(monthTextField);
 
         final JTextField yearTextField = new JTextField(note.getYear());
-        yearTextField.addFocusListener(new TextFieldFormatter(note.getYear()));
+        yearTextField.addFocusListener(controller.getNumericTextFieldFocusListener(note.getYear()));
         yearTextField.setBounds(SECOND_COL_X_POS + 70, Y0 + DELTA_Y * 7, 60, ELEMENT_HEIGHT);
         add(yearTextField);
 
@@ -227,37 +233,5 @@ class NoteEditDialog extends JDialog {
         }
     }
 
-    private class TextFieldFormatter implements FocusListener {
-        private String defaultValue;
 
-        TextFieldFormatter(String defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        @Override
-        public void focusGained(FocusEvent e) {
-
-        }
-
-        @Override
-        public void focusLost(FocusEvent e) {
-            if (!(e.getSource() instanceof JTextField)) {
-                return;
-            }
-
-            JTextField textField = (JTextField) e.getSource();
-
-            String text = textField.getText();
-
-            if (!text.matches("\\d+")) {
-                text = text.replaceAll("\\D", "");
-            }
-
-            if (text.length() == 0) {
-                text = defaultValue;
-            }
-
-            textField.setText(text);
-        }
-    }
 }

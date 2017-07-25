@@ -1,13 +1,14 @@
 package com.wirusmx.mybudget.model;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
+import com.wirusmx.mybudget.controller.Controller;
+import com.wirusmx.mybudget.model.comparators.DateComparator;
+import com.wirusmx.mybudget.model.comparators.MyComparator;
+import com.wirusmx.mybudget.model.comparators.TitlesComparator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -16,11 +17,59 @@ public class Model {
     private static final String USER_SETTINGS_PROPERTIES_PATH = "conf/user_settings.properties";
 
     private JdbcTemplate template;
+    private Controller controller;
 
     private Properties userSettings;
 
-    public Model(JdbcTemplate template) {
+    private MyComparator[] comparators;
+
+    private int selectedPeriodType = PeriodType.ALL;
+    private String selectedPeriod = "";
+    private int selectedSortType = SortType.DATE;
+    private int selectedSortOrder = MyComparator.REVERSE_ORDER;
+
+    public Model(JdbcTemplate template, Controller controller) {
         this.template = template;
+        this.controller = controller;
+    }
+
+    public int getSelectedPeriodType() {
+        return selectedPeriodType;
+    }
+
+    public void setSelectedPeriodType(int selectedPeriodType) {
+        this.selectedPeriodType = selectedPeriodType;
+    }
+
+    public String getSelectedPeriod() {
+        return selectedPeriod;
+    }
+
+    public void setSelectedPeriod(String selectedPeriod) {
+        this.selectedPeriod = selectedPeriod;
+        setUserSettingsValue("main.window.period.type", "" + selectedPeriodType);
+        setUserSettingsValue("main.window.period", selectedPeriod);
+    }
+
+    public int getSelectedSortType() {
+        return selectedSortType;
+    }
+
+    public void setSelectedSortType(int selectedSortType) {
+        this.selectedSortType = selectedSortType;
+        setUserSettingsValue("main.window.sort.type", "" + selectedSortType);
+    }
+
+    public int getSelectedSortOrder() {
+        return selectedSortOrder;
+    }
+
+    public void setSelectedSortOrder(int selectedSortOrder) {
+        this.selectedSortOrder = selectedSortOrder;
+        setUserSettingsValue("main.window.sort.order", "" + selectedSortOrder);
+        for (MyComparator c : comparators) {
+            c.setOrder(selectedSortOrder);
+        }
     }
 
     public void init() {
@@ -45,6 +94,18 @@ public class Model {
                 DefaultExceptionHandler.handleException(e);
             }
         }
+        selectedPeriodType = Integer.parseInt(getUserSettingsValue("main.window.period.type",
+                "" + selectedPeriodType));
+        selectedPeriod = getUserSettingsValue("main.window.period", selectedPeriod);
+        selectedSortType = Integer.parseInt(getUserSettingsValue("main.window.sort.type",
+                "" + selectedSortType));
+        selectedSortOrder = Integer.parseInt(getUserSettingsValue("main.window.sort.order",
+                "" + selectedSortOrder));
+
+        comparators = new MyComparator[]{
+                new DateComparator(selectedSortOrder),
+                new TitlesComparator(selectedSortOrder)
+        };
     }
 
     public Set<SimpleData> getComboBoxValues(String tableName) {
@@ -87,20 +148,23 @@ public class Model {
 
     }
 
-    public List<Note> getNotes(String period) {
+    public List<Note> getNotes() {
+
+        String period = "";
+
         List<Note> result = new ArrayList<>();
 
-        if (!("".equals(period))){
-            String[] parts = period.split("\\D");
-            if (parts.length >= 1){
+        if (selectedPeriodType != PeriodType.ALL && !("".equals(selectedPeriod))) {
+            String[] parts = selectedPeriod.split("\\D");
+            if (parts.length >= 1) {
                 period = "WHERE year LIKE '" + parts[0] + "' ";
             }
 
-            if (parts.length >= 2){
+            if (parts.length >= 2) {
                 period += "AND month LIKE '" + parts[1] + "' ";
             }
 
-            if (parts.length == 3){
+            if (parts.length == 3) {
                 period += "AND day LIKE '" + parts[2] + "' ";
             }
         }
@@ -127,6 +191,9 @@ public class Model {
         } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
+
+        Collections.sort(result, comparators[selectedSortType]);
+
         return result;
     }
 
@@ -147,7 +214,37 @@ public class Model {
                 + "'" + note.getYear() + "');");
     }
 
-    public Set<String> getYears() {
+    public String readTextFromFile(String fileName) {
+        String result = "";
+
+        try (BufferedReader reader
+                     = new BufferedReader(
+                new InputStreamReader(
+                        getClass().getResourceAsStream("/text/" + fileName)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result += line + "\n";
+            }
+        } catch (IOException ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return result;
+    }
+
+    public Set<String> getPeriods() {
+        switch (selectedPeriodType) {
+            case PeriodType.YEAR:
+                return getYears();
+            case PeriodType.MONTH:
+                return getMonths();
+            case PeriodType.DAY:
+                return getDays();
+        }
+
+        return new TreeSet<>();
+    }
+
+    private Set<String> getYears() {
         List<String> temp = new ArrayList<>();
 
         try {
@@ -163,7 +260,7 @@ public class Model {
         return new TreeSet<>(temp);
     }
 
-    public Set<String> getMonths() {
+    private Set<String> getMonths() {
         List<String> temp = new ArrayList<>();
 
         try {
@@ -179,7 +276,7 @@ public class Model {
         return new TreeSet<>(temp);
     }
 
-    public Set<String> getDays() {
+    private Set<String> getDays() {
         List<String> temp = new ArrayList<>();
 
         try {
@@ -196,11 +293,11 @@ public class Model {
         return new TreeSet<>(temp);
     }
 
-    public String getUserSettingsValue(String key, String defaultValue) {
+    private String getUserSettingsValue(String key, String defaultValue) {
         return userSettings.getProperty(key, defaultValue);
     }
 
-    public void setUserSettingsValue(String key, String value) {
+    private void setUserSettingsValue(String key, String value) {
         userSettings.setProperty(key, value);
         saveUserSettings();
     }
@@ -212,6 +309,7 @@ public class Model {
             DefaultExceptionHandler.handleException(e);
         }
     }
+
 
     private class ComboBoxValuesComparator implements Comparator<SimpleData> {
         @Override
@@ -229,4 +327,21 @@ public class Model {
     }
 
 
+    @SuppressWarnings("WeakerAccess")
+    public static class PeriodType {
+        public static final int ALL = 0;
+        public static final int YEAR = 1;
+        public static final int MONTH = 2;
+        public static final int DAY = 3;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SortType {
+        public static final int DATE = 0;
+        public static final int ITEM = 1;
+        public static final int TYPE = 2;
+        public static final int PRICE = 3;
+        public static final int SHOP = 4;
+        public static final int BY_SALE = 5;
+    }
 }
