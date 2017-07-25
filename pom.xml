@@ -29,7 +29,7 @@
         <java.version>1.7</java.version>
         <main.class>com.wirusmx.mybudget.MainClass</main.class>
         <application.title>MyBudget</application.title>
-        <jar.output>${basedir}/target/${application.title}${project.version}</jar.output>
+        <application.output>${basedir}/target/${application.title}${project.version}</application.output>
     </properties>
 
     <dependencies>
@@ -75,7 +75,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <outputDirectory>${jar.output}</outputDirectory>
+                    <includes>
+                        <include>conf/user_settings.properties</include>
+                    </includes>
+                    <outputDirectory>${application.output}</outputDirectory>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
@@ -96,7 +99,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${jar.output}/lib</outputDirectory>
+                            <outputDirectory>${application.output}/lib</outputDirectory>
                             <includeScope>compile</includeScope>
                         </configuration>
                     </execution>
@@ -115,7 +118,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${jar.output}/img</outputDirectory>
+                            <outputDirectory>${application.output}/img</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>img</directory>
@@ -130,7 +133,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${jar.output}/conf</outputDirectory>
+                            <outputDirectory>${application.output}/conf</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>conf</directory>
@@ -157,8 +160,8 @@
                         </goals>
                         <configuration>
                             <headerType>gui</headerType>
-                            <outfile>${jar.output}/${application.title}.exe</outfile>
-                            <jar>${jar.output}/${application.title}.jar</jar>
+                            <outfile>${application.output}/${application.title}.exe</outfile>
+                            <jar>${application.output}/${application.title}.jar</jar>
                             <errTitle>${application.title}</errTitle>
                             <icon>img/favicon.ico</icon>
                             <classPath>

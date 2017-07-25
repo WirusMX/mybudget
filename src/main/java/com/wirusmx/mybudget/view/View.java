@@ -133,8 +133,13 @@ public class View extends JFrame {
         JMenuItem newNoteMenuItem = new JMenuItem("Новая запись");
         newNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         newNoteMenuItem.addActionListener(new AddNewNoteActionListener());
-
         fileMenu.add(newNoteMenuItem);
+
+        JMenuItem editNoteMenuItem = new JMenuItem("Изменить запись");
+        editNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
+        editNoteMenuItem.addActionListener(new EditNoteActionListener());
+        fileMenu.add(editNoteMenuItem);
+
 
         fileMenu.addSeparator();
 
@@ -149,6 +154,18 @@ public class View extends JFrame {
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
+
+        JMenu infoMenu = new JMenu("Справка");
+
+        JMenuItem aboutMenuItem = new JMenuItem("О программе");
+        aboutMenuItem.addActionListener(new AboutButtonActionListener());
+        infoMenu.add(aboutMenuItem);
+
+        JMenuItem usingRulesMenuItem = new JMenuItem("Правила пользования ПО");
+        usingRulesMenuItem.addActionListener(new UsingRulesButtonActionListener());
+        infoMenu.add(usingRulesMenuItem);
+
+        menuBar.add(infoMenu);
 
         getContentPane().add(menuBar, BorderLayout.NORTH);
     }
@@ -322,6 +339,35 @@ public class View extends JFrame {
         }
     }
 
+    private class AboutButtonActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JOptionPane.showMessageDialog(thisView,
+                    applicationTitle + " " + applicationVersion + "\n"
+                            + "© WirusMX, 2017\n"
+                    + "\nПо вопросам обращаться:\nE-mail: WirusMX@bk.ru\n"
+                    + "\n\nВнимание! Данная программа защищена законами об авторских правах.\n" +
+                            "Незаконное воспроизведение, модифицирование или распространение \nданной программы " +
+                            "или любой ее части запрещено.",
+                    "О программе", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private class UsingRulesButtonActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JTextArea messageTextArea = new JTextArea("");
+            JOptionPane.showMessageDialog(thisView,
+                    applicationTitle + " " + applicationVersion + "\n"
+                            + "© WirusMX, 2017\n"
+                            + "\nПо вопросам обращаться:\nE-mail: WirusMX@bk.ru\n"
+                            + "\n\nВнимание! Данная программа защищена законами об авторских правах.\n" +
+                            "Незаконное воспроизведение, модифицирование или распространение \nданной программы " +
+                            "или любой ее части запрещено.",
+                    "О программе", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
     private class PeriodTypeItemListener implements ItemListener {
 
         private JComboBox<String> periodComboBox;
@@ -352,7 +398,7 @@ public class View extends JFrame {
 
             JComboBox<SimpleData> periodComboBox = (JComboBox) e.getSource();
             selectedPeriod = ((String) periodComboBox.getSelectedItem());
-            if (selectedPeriod == null){
+            if (selectedPeriod == null) {
                 selectedPeriod = "";
                 return;
             }
