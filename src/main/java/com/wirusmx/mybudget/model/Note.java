@@ -111,10 +111,12 @@ public class Note {
 
     @Override
     public String toString() {
-        String result = item + " (" + shop.getTitle() + ", " + price + " руб., " + day + "." + month + "." + year + ")";
+        String result = item + " (" + shop.getTitle() + ", " + price + " руб. ";
         if (bySale) {
-            result += " со скидкой";
+            result += "(со скидкой)";
         }
+
+        result += ", " + day + "." + month + "." + year + ")";
 
         if (quality.getId() != Model.Quality.UNDEFINED) {
             result += "  ";
