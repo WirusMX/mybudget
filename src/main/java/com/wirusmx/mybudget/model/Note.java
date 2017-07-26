@@ -27,7 +27,7 @@ public class Note {
                 new SimpleData(0, ""),
                 false,
                 "" + new GregorianCalendar().get(Calendar.DAY_OF_MONTH),
-                "" + new GregorianCalendar().get(Calendar.MONTH),
+                "" + (new GregorianCalendar().get(Calendar.MONTH) + 1),
                 "" + new GregorianCalendar().get(Calendar.YEAR)
         );
 
@@ -115,6 +115,14 @@ public class Note {
         if (bySale) {
             result += " со скидкой";
         }
+
+        if (quality.getId() != Model.Quality.UNDEFINED) {
+            result += "  ";
+            for (int i = 0; i < 4 - quality.getId(); i++) {
+                result += "★";
+            }
+        }
+
         return result;
     }
 

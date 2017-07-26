@@ -44,14 +44,14 @@ public class Controller {
     private AddNewNoteButtonActionListener addNewNoteButtonActionListener = null;
     private EditNoteActionListener editNoteActionListener = null;
     private ExitButtonButtonActionListener exitButtonButtonActionListener = null;
-    private AboutButtonButtonActionListener aboutButtonButtonActionListener = null;
+    private AboutButtonActionListener aboutButtonActionListener = null;
     private UsingRulesButtonActionListener usingRulesButtonActionListener = null;
     private PeriodTypeComboBoxItemListener periodTypeComboBoxItemListener = null;
     private PeriodComboBoxItemListener periodComboBoxItemListener = null;
     private SortTypeComboBoxItemListener sortTypeComboBoxItemListener = null;
     private SortOrderComboBoxItemListener sortOrderComboBoxItemListener = null;
     private SearchButtonActionListener searchButtonActionListener = null;
-    private UpdateButtonActionListener updateButtonActionListener = null;
+    private ResetButtonActionListener resetButtonActionListener = null;
 
     public AddNewNoteButtonActionListener getAddNewNoteButtonActionListener() {
         if (addNewNoteButtonActionListener == null) {
@@ -80,11 +80,11 @@ public class Controller {
         return exitButtonButtonActionListener;
     }
 
-    public AboutButtonButtonActionListener getAboutButtonButtonActionListener() {
-        if (aboutButtonButtonActionListener == null) {
-            aboutButtonButtonActionListener = new AboutButtonButtonActionListener();
+    public AboutButtonActionListener getAboutButtonActionListener() {
+        if (aboutButtonActionListener == null) {
+            aboutButtonActionListener = new AboutButtonActionListener();
         }
-        return aboutButtonButtonActionListener;
+        return aboutButtonActionListener;
     }
 
     public UsingRulesButtonActionListener getUsingRulesButtonActionListener() {
@@ -129,15 +129,35 @@ public class Controller {
         return searchButtonActionListener;
     }
 
-    public UpdateButtonActionListener getUpdateButtonActionListener() {
-        if (updateButtonActionListener == null) {
-            updateButtonActionListener = new UpdateButtonActionListener();
+    public ResetButtonActionListener getResetButtonActionListener(JTextField textField) {
+        if (resetButtonActionListener == null) {
+            resetButtonActionListener = new ResetButtonActionListener(textField);
         }
-        return updateButtonActionListener;
+        return resetButtonActionListener;
     }
 
     public NumericTextFieldFocusListener getNumericTextFieldFocusListener(String defaultValue) {
         return new NumericTextFieldFocusListener(defaultValue);
+    }
+
+    public NoteEditDialogComboBoxItemListener getNoteEditDialogComboBoxItemListener(JDialog dialog, String table) {
+        return new NoteEditDialogComboBoxItemListener(dialog, table);
+    }
+
+    public SaveNoteButtonActionListener getSaveNoteButtonActionListener(NoteEditDialog dialog, Note note, JTextField itemNameTextField,
+                                                                        JComboBox itemTypeComboBox, JTextField itemPriceTextField,
+                                                                        JComboBox shopComboBox, JComboBox necessityLevelComboBox,
+                                                                        JComboBox qualityLevelComboBox, JCheckBox saleCheckBox,
+                                                                        JTextField dayTextField, JTextField monthTextField,
+                                                                        JTextField yearTextField) {
+        return new SaveNoteButtonActionListener(dialog, note, itemNameTextField, itemTypeComboBox, itemPriceTextField,
+                shopComboBox, necessityLevelComboBox, qualityLevelComboBox, saleCheckBox, dayTextField, monthTextField,
+                yearTextField);
+
+    }
+
+    public CloseDialogButtonActionListener getCloseDialogButtonActionListener(NoteEditDialog dialog, Note note) {
+        return new CloseDialogButtonActionListener(dialog, note);
     }
 
     public int getSelectedPeriodType() {
@@ -160,18 +180,22 @@ public class Controller {
         return model.getPeriods();
     }
 
+    public ImageIcon getImage(String fileName) {
+        return model.getImage(fileName);
+    }
+
     private class AddNewNoteButtonActionListener implements ActionListener {
         private Controller controller;
 
-        public AddNewNoteButtonActionListener(Controller controller) {
+        AddNewNoteButtonActionListener(Controller controller) {
             this.controller = controller;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            NoteEditDialog noteEditDialog = new NoteEditDialog(view, controller);
+            NoteEditDialog noteEditDialog = new NoteEditDialog(controller);
             Note note = noteEditDialog.getNote();
-            if (note != null) {
+            if (noteEditDialog.getDialogResult() == JOptionPane.YES_OPTION && note != null) {
                 model.insertNote(note);
                 view.update();
             }
@@ -182,7 +206,7 @@ public class Controller {
         private Controller controller;
         private JList<Note> notesList;
 
-        public EditNoteActionListener(Controller controller, JList<Note> notesList) {
+        EditNoteActionListener(Controller controller, JList<Note> notesList) {
             this.controller = controller;
             this.notesList = notesList;
         }
@@ -197,9 +221,9 @@ public class Controller {
             if (note == null) {
                 return;
             }
-            NoteEditDialog noteEditDialog = new NoteEditDialog(view, controller, note);
+            NoteEditDialog noteEditDialog = new NoteEditDialog(controller, note);
             note = noteEditDialog.getNote();
-            if (note != null) {
+            if (noteEditDialog.getDialogResult() == JOptionPane.YES_OPTION && note != null) {
                 model.updateNote(note);
                 view.update();
             }
@@ -240,7 +264,7 @@ public class Controller {
         }
     }
 
-    private class AboutButtonButtonActionListener implements ActionListener {
+    private class AboutButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JOptionPane.showMessageDialog(view,
@@ -351,31 +375,22 @@ public class Controller {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            /*
-            if (searchTextField.readTextFromFile().length() == 0) {
-                return;
-            }
-
-
-            java.util.List<Note> notes = new ArrayList<>();
-            for (int i = 0; i < noteDefaultListModel.getSize(); i++) {
-                if (noteDefaultListModel.get(i).getItem().equalsIgnoreCase(searchTextField.readTextFromFile())) {
-                    notes.add(noteDefaultListModel.get(i));
-                }
-            }
-
-            noteDefaultListModel.clear();
-
-            for (Note n : notes) {
-                noteDefaultListModel.addElement(n);
-            }
-            */
+            model.setSearchQuery(searchTextField.getText());
+            view.update();
         }
     }
 
-    private class UpdateButtonActionListener implements ActionListener {
+    private class ResetButtonActionListener implements ActionListener {
+        JTextField textField;
+
+        ResetButtonActionListener(JTextField textField) {
+            this.textField = textField;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
+            textField.setText("");
+            model.setSearchQuery("");
             view.update();
         }
     }
@@ -413,4 +428,116 @@ public class Controller {
             textField.setText(text);
         }
     }
+
+    private class NoteEditDialogComboBoxItemListener implements ItemListener {
+        JDialog dialog;
+        private String table;
+
+        NoteEditDialogComboBoxItemListener(JDialog dialog, String table) {
+            this.dialog = dialog;
+            this.table = table;
+        }
+
+        @SuppressWarnings({"unchecked"})
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (!(e.getSource() instanceof JComboBox)) {
+                return;
+            }
+
+            JComboBox<SimpleData> cb = (JComboBox<SimpleData>) e.getSource();
+
+            if (!(e.getItem() instanceof SimpleData)) {
+                return;
+            }
+
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            SimpleData sd = (SimpleData) e.getItem();
+            if (sd.getId() != -1) {
+                return;
+            }
+
+            String newValue = JOptionPane.showInputDialog(dialog, "Введите новое значение:", "", JOptionPane.PLAIN_MESSAGE);
+            if (newValue != null) {
+                int id = insertNewValue(newValue, table);
+                cb.insertItemAt(new SimpleData(id, newValue), 0);
+            }
+            cb.setSelectedIndex(0);
+        }
+    }
+
+    private class SaveNoteButtonActionListener implements ActionListener {
+        NoteEditDialog dialog;
+        Note note;
+        JTextField itemNameTextField;
+        JComboBox itemTypeComboBox;
+        JTextField itemPriceTextField;
+        JComboBox shopComboBox;
+        JComboBox necessityLevelComboBox;
+        JComboBox qualityLevelComboBox;
+        JCheckBox saleCheckBox;
+        JTextField dayTextField;
+        JTextField monthTextField;
+        JTextField yearTextField;
+
+        SaveNoteButtonActionListener(NoteEditDialog dialog, Note note, JTextField itemNameTextField,
+                                     JComboBox itemTypeComboBox, JTextField itemPriceTextField,
+                                     JComboBox shopComboBox, JComboBox necessityLevelComboBox,
+                                     JComboBox qualityLevelComboBox, JCheckBox saleCheckBox,
+                                     JTextField dayTextField, JTextField monthTextField,
+                                     JTextField yearTextField) {
+            this.dialog = dialog;
+            this.note = note;
+            this.itemNameTextField = itemNameTextField;
+            this.itemTypeComboBox = itemTypeComboBox;
+            this.itemPriceTextField = itemPriceTextField;
+            this.shopComboBox = shopComboBox;
+            this.necessityLevelComboBox = necessityLevelComboBox;
+            this.qualityLevelComboBox = qualityLevelComboBox;
+            this.saleCheckBox = saleCheckBox;
+            this.dayTextField = dayTextField;
+            this.monthTextField = monthTextField;
+            this.yearTextField = yearTextField;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (itemNameTextField.getText().length() == 0) {
+                JOptionPane.showMessageDialog(dialog, "Укажите товар!", "", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            note.update(itemNameTextField.getText(), (SimpleData) itemTypeComboBox.getSelectedItem(),
+                    Integer.parseInt(itemPriceTextField.getText()), (SimpleData) shopComboBox.getSelectedItem(),
+                    (SimpleData) necessityLevelComboBox.getSelectedItem(), (SimpleData) qualityLevelComboBox.getSelectedItem(),
+                    saleCheckBox.isSelected(), dayTextField.getText(), monthTextField.getText(), yearTextField.getText());
+
+            dialog.setDialogResult(JOptionPane.YES_OPTION);
+
+            dialog.dispose();
+        }
+    }
+
+    private class CloseDialogButtonActionListener implements ActionListener {
+        NoteEditDialog dialog;
+        Note note;
+
+        CloseDialogButtonActionListener(NoteEditDialog dialog, Note note) {
+            this.dialog = dialog;
+            this.note = note;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            note = null;
+
+            dialog.setDialogResult(JOptionPane.NO_OPTION);
+
+            dialog.dispose();
+        }
+    }
+
 }

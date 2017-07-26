@@ -8,6 +8,7 @@ import com.wirusmx.mybudget.model.comparators.TitlesComparator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import javax.swing.*;
 import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,6 +16,9 @@ import java.util.*;
 
 public class Model {
     private static final String USER_SETTINGS_PROPERTIES_PATH = "conf/user_settings.properties";
+    private static final String TEXT_FILES_PREFIX = "/text/";
+    private static final String IMAGES_FILES_PREFIX = "/images/";
+    private static final String IMAGES_FILES_EXT = ".png";
 
     private JdbcTemplate template;
     private Controller controller;
@@ -27,6 +31,7 @@ public class Model {
     private String selectedPeriod = "";
     private int selectedSortType = SortType.DATE;
     private int selectedSortOrder = MyComparator.REVERSE_ORDER;
+    private String searchQuery = "";
 
     public Model(JdbcTemplate template, Controller controller) {
         this.template = template;
@@ -70,6 +75,10 @@ public class Model {
         for (MyComparator c : comparators) {
             c.setOrder(selectedSortOrder);
         }
+    }
+
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
 
     public void init() {
@@ -194,6 +203,19 @@ public class Model {
 
         Collections.sort(result, comparators[selectedSortType]);
 
+        if (!"".equals(searchQuery)) {
+            List<Note> temp = new ArrayList<>();
+            String sq = searchQuery.toLowerCase();
+
+            for (Note n : result) {
+                if (n.getItem().toLowerCase().contains(sq)) {
+                    temp.add(n);
+                }
+            }
+
+            result = temp;
+        }
+
         return result;
     }
 
@@ -220,15 +242,26 @@ public class Model {
         try (BufferedReader reader
                      = new BufferedReader(
                 new InputStreamReader(
-                        getClass().getResourceAsStream("/text/" + fileName)))) {
+                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName)))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result += line + "\n";
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
         return result;
+    }
+
+    public ImageIcon getImage(String fileName) {
+        ImageIcon image = null;
+
+        try {
+            image = new ImageIcon(getClass().getResource(IMAGES_FILES_PREFIX + fileName + IMAGES_FILES_EXT));
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return image;
     }
 
     public Set<String> getPeriods() {
@@ -257,7 +290,9 @@ public class Model {
         } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
-        return new TreeSet<>(temp);
+
+
+        return new TreeSet<>(temp).descendingSet();
     }
 
     private Set<String> getMonths() {
@@ -273,7 +308,7 @@ public class Model {
         } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
-        return new TreeSet<>(temp);
+        return new TreeSet<>(temp).descendingSet();
     }
 
     private Set<String> getDays() {
@@ -290,7 +325,7 @@ public class Model {
         } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
-        return new TreeSet<>(temp);
+        return new TreeSet<>(temp).descendingSet();
     }
 
     private String getUserSettingsValue(String key, String defaultValue) {
@@ -326,7 +361,6 @@ public class Model {
         }
     }
 
-
     @SuppressWarnings("WeakerAccess")
     public static class PeriodType {
         public static final int ALL = 0;
@@ -344,4 +378,17 @@ public class Model {
         public static final int SHOP = 4;
         public static final int BY_SALE = 5;
     }
+
+    public static class Quality {
+        public static final int UNDEFINED = 0;
+        public static final int HIGH = 1;
+        public static final int MEDIUM = 2;
+        public static final int LOW = 3;
+    }
+
+    public static class Necessity {
+        public static final int HIGH = 0;
+        public static final int LOW = 1;
+    }
 }
+

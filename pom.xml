@@ -70,6 +70,12 @@
                     <include>**/*.txt</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>src/main/res</directory>
+                <includes>
+                    <include>**/*.png</include>
+                </includes>
+            </resource>
         </resources>
 
         <plugins>

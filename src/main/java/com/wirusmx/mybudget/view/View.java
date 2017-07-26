@@ -28,12 +28,9 @@ public class View extends JFrame {
         this.applicationVersion = applicationVersion;
     }
 
-    Controller getController() {
-        return controller;
-    }
-
     public void init() {
         setTitle(applicationTitle + " v." + applicationVersion);
+        setIconImage(controller.getImage("favicon").getImage());
         setBounds(0, 0, 1024, 600);
         setMinimumSize(new Dimension(900, 300));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -65,9 +62,19 @@ public class View extends JFrame {
 
         notesList.addMouseListener(controller.getEditNoteActionListener(notesList));
 
-        addMainMenu();
+        JMenuBar mainMenu = new JMenuBar();
 
-        addControlPanel();
+        addMainMenu(mainMenu);
+
+        JMenuBar controlPanel = new JMenuBar();
+
+        addControlPanel(controlPanel);
+
+        JPanel panel = new JPanel(new BorderLayout(2, 2));
+        panel.add(mainMenu, BorderLayout.NORTH);
+        panel.add(controlPanel, BorderLayout.SOUTH);
+
+        getContentPane().add(panel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(new JScrollPane(notesList), BorderLayout.CENTER);
@@ -94,23 +101,24 @@ public class View extends JFrame {
             necSum[n.getNecessity().getId()] += n.getPrice();
         }
 
-        statLabel.setText("Итого: " + summ + " руб., из них " + necSum[0] + " руб. - высокой необходимости, " +
+        statLabel.setText("Итого: " + summ + " руб., из них " + necSum[0] + " руб. на продукты высокой необходимости, " +
                 necSum[1] + " руб. - низкой необходимости");
     }
 
-    private void addMainMenu() {
-        JMenuBar menuBar = new JMenuBar();
+    private void addMainMenu(JMenuBar menuBar) {
 
         JMenu fileMenu = new JMenu("Файл");
 
         JMenuItem newNoteMenuItem = new JMenuItem("Новая запись");
         newNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         newNoteMenuItem.addActionListener(controller.getAddNewNoteButtonActionListener());
+        newNoteMenuItem.setIcon(controller.getImage("new"));
         fileMenu.add(newNoteMenuItem);
 
         JMenuItem editNoteMenuItem = new JMenuItem("Изменить запись");
         editNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
         editNoteMenuItem.addActionListener(controller.getEditNoteActionListener(notesList));
+        editNoteMenuItem.setIcon(controller.getImage("edit"));
         fileMenu.add(editNoteMenuItem);
 
         fileMenu.addSeparator();
@@ -118,6 +126,7 @@ public class View extends JFrame {
         JMenuItem exitMenuItem = new JMenuItem("Выход");
         exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.ALT_MASK));
         exitMenuItem.addActionListener(controller.getExitButtonButtonActionListener());
+        exitMenuItem.setIcon(controller.getImage("exit"));
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
@@ -125,34 +134,22 @@ public class View extends JFrame {
         JMenu infoMenu = new JMenu("Справка");
 
         JMenuItem aboutMenuItem = new JMenuItem("О программе");
-        aboutMenuItem.addActionListener(controller.getAboutButtonButtonActionListener());
+        aboutMenuItem.addActionListener(controller.getAboutButtonActionListener());
+        aboutMenuItem.setIcon(controller.getImage("about"));
         infoMenu.add(aboutMenuItem);
 
         JMenuItem usingRulesMenuItem = new JMenuItem("Правила пользования ПО");
         usingRulesMenuItem.addActionListener(controller.getUsingRulesButtonActionListener());
+        usingRulesMenuItem.setIcon(controller.getImage("using_rules"));
         infoMenu.add(usingRulesMenuItem);
 
         menuBar.add(infoMenu);
 
-        getContentPane().add(menuBar, BorderLayout.NORTH);
+
     }
 
-    private void addControlPanel() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JButton newNoteButton = new JButton("+");
-        newNoteButton.addActionListener(controller.getAddNewNoteButtonActionListener());
-        menuBar.add(newNoteButton);
-
-        menuBar.add(new JLabel(" "));
-
-        JButton editButton = new JButton("/");
-        editButton.addActionListener(controller.getEditNoteActionListener(notesList));
-        menuBar.add(editButton);
-
-        menuBar.add(new JLabel(" | "));
-
-        menuBar.add(new JLabel("За период:"));
+    private void addControlPanel(JMenuBar menuBar) {
+        menuBar.add(new JLabel("Показать записи за период: "));
         JComboBox<SimpleData> periodTypeComboBox = new JComboBox<>();
         periodTypeComboBox.addItem(new SimpleData(Model.PeriodType.ALL, "Все"));
         periodTypeComboBox.addItem(new SimpleData(Model.PeriodType.YEAR, "Год"));
@@ -160,6 +157,8 @@ public class View extends JFrame {
         periodTypeComboBox.addItem(new SimpleData(Model.PeriodType.DAY, "День"));
         periodTypeComboBox.setSelectedIndex(controller.getSelectedPeriodType());
         menuBar.add(periodTypeComboBox);
+
+        menuBar.add(new JLabel(" "));
 
         JComboBox<String> periodComboBox = new JComboBox<>();
         setPeriodComboBoxValues(periodComboBox, controller.getSelectedPeriodType());
@@ -183,6 +182,8 @@ public class View extends JFrame {
         sortTypeComboBox.addItemListener(controller.getSortTypeComboBoxItemListener());
         menuBar.add(sortTypeComboBox);
 
+        menuBar.add(new JLabel(" "));
+
         JComboBox<SimpleData> sortOrderComboBox = new JComboBox<>();
         sortOrderComboBox.addItem(new SimpleData(MyComparator.DIRECT_ORDER, "Прямая (А->Я)"));
         sortOrderComboBox.addItem(new SimpleData(MyComparator.REVERSE_ORDER, "Обратная (Я->А)"));
@@ -190,26 +191,25 @@ public class View extends JFrame {
         sortOrderComboBox.addItemListener(controller.getSortOrderComboBoxItemListener());
         menuBar.add(sortOrderComboBox);
 
-
         menuBar.add(new JLabel(" | "));
-
-        JButton updateButton = new JButton("Обновить");
-        updateButton.addActionListener(controller.getUpdateButtonActionListener());
-        menuBar.add(updateButton);
-
-        menuBar.add(new JLabel(" | "));
-
 
         JTextField searchTextField = new JTextField("");
         menuBar.add(searchTextField);
         JButton searchButton = new JButton("Поиск");
         searchButton.addActionListener(controller.getSearchButtonActionListener(searchTextField));
         menuBar.add(searchButton);
-        getContentPane().add(menuBar, BorderLayout.SOUTH);
+
+        menuBar.add(new JLabel(" "));
+
+        JButton resetButton = new JButton("Сбросить");
+        resetButton.addActionListener(controller.getResetButtonActionListener(searchTextField));
+        menuBar.add(resetButton);
+
+        //getContentPane().add(menuBar, BorderLayout.SOUTH);
     }
 
     public void setPeriodComboBoxValues(JComboBox<String> periodComboBox, int periodType) {
-        periodComboBox.setEnabled(periodType != Model.PeriodType.ALL);
+        periodComboBox.setVisible(periodType != Model.PeriodType.ALL);
         periodComboBox.removeAllItems();
 
         Set<String> values = controller.getPeriods();
