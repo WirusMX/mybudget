@@ -4,6 +4,7 @@ import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 import com.wirusmx.mybudget.view.NoteEditDialog;
+import com.wirusmx.mybudget.view.StatisticsDialog;
 import com.wirusmx.mybudget.view.View;
 
 import javax.swing.*;
@@ -12,6 +13,9 @@ import java.awt.event.*;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @author Piunov M (aka WirusMX)
+ */
 public class Controller {
     private Model model;
     private View view;
@@ -34,7 +38,7 @@ public class Controller {
     }
 
     public int insertNewValue(String value, String table) {
-        return model.insertNewValue(value, table);
+        return model.insertNewComboBoxValue(value, table);
     }
 
     public List<Note> getNotes() {
@@ -43,7 +47,10 @@ public class Controller {
 
     private AddNewNoteButtonActionListener addNewNoteButtonActionListener = null;
     private EditNoteActionListener editNoteActionListener = null;
+    private RemoveNoteButtonActionListener removeNoteButtonActionListener = null;
     private ExitButtonButtonActionListener exitButtonButtonActionListener = null;
+    private StatisticsButtonButtonActionListener statisticsButtonButtonActionListener = null;
+    private SettingsButtonButtonActionListener settingsButtonButtonActionListener = null;
     private AboutButtonActionListener aboutButtonActionListener = null;
     private UsingRulesButtonActionListener usingRulesButtonActionListener = null;
     private PeriodTypeComboBoxItemListener periodTypeComboBoxItemListener = null;
@@ -72,12 +79,33 @@ public class Controller {
         return editNoteActionListener;
     }
 
+    public RemoveNoteButtonActionListener getRemoveNoteButtonActionListener(JList<Note> notesList) {
+        if (removeNoteButtonActionListener == null) {
+            removeNoteButtonActionListener = new RemoveNoteButtonActionListener(notesList);
+        }
+        return removeNoteButtonActionListener;
+    }
+
     public ExitButtonButtonActionListener getExitButtonButtonActionListener() {
         if (exitButtonButtonActionListener == null) {
             exitButtonButtonActionListener = new ExitButtonButtonActionListener();
         }
 
         return exitButtonButtonActionListener;
+    }
+
+    public StatisticsButtonButtonActionListener getStatisticsButtonButtonActionListener() {
+        if (statisticsButtonButtonActionListener == null) {
+            statisticsButtonButtonActionListener = new StatisticsButtonButtonActionListener(this);
+        }
+        return statisticsButtonButtonActionListener;
+    }
+
+    public SettingsButtonButtonActionListener getSettingsButtonButtonActionListener() {
+        if (settingsButtonButtonActionListener == null) {
+            settingsButtonButtonActionListener = new SettingsButtonButtonActionListener();
+        }
+        return settingsButtonButtonActionListener;
     }
 
     public AboutButtonActionListener getAboutButtonActionListener() {
@@ -160,6 +188,14 @@ public class Controller {
         return new CloseDialogButtonActionListener(dialog, note);
     }
 
+    public StatisticsDialogPeriodComboBoxItemListener getStatisticsDialogPeriodComboBoxItemListener(StatisticsDialog dialog){
+        return new StatisticsDialogPeriodComboBoxItemListener(dialog);
+    }
+
+    public StatisticsDialogItemTypeComboBoxItemListener getStatisticsDialogItemTypeComboBoxItemListener(StatisticsDialog dialog){
+        return new StatisticsDialogItemTypeComboBoxItemListener(dialog);
+    }
+
     public int getSelectedPeriodType() {
         return model.getSelectedPeriodType();
     }
@@ -180,9 +216,34 @@ public class Controller {
         return model.getPeriods();
     }
 
+    public Set<String> getPeriods(int periodType) {
+        return model.getPeriods(periodType);
+    }
+
     public ImageIcon getImage(String fileName) {
         return model.getImage(fileName);
     }
+
+    public int[][] getStatistics(int periodType, String period, int itemType) {
+        int[][] result;
+        if (periodType == Model.PeriodType.YEAR) {
+            result = new int[3][12];
+
+            List<Note> notes = model.getNotes(periodType, period);
+
+            for (Note n : notes) {
+                if (itemType == -1 || n.getType().getId() == itemType) {
+                    result[2][Integer.parseInt(n.getMonth()) - 1] += n.getPrice();
+                    result[n.getNecessity().getId()][Integer.parseInt(n.getMonth()) - 1] += n.getPrice();
+                }
+            }
+        } else {
+            result = new int[3][0];
+        }
+
+        return result;
+    }
+
 
     private class AddNewNoteButtonActionListener implements ActionListener {
         private Controller controller;
@@ -231,7 +292,7 @@ public class Controller {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() == 2) {
+            if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
                 doEdit();
             }
         }
@@ -257,6 +318,26 @@ public class Controller {
         }
     }
 
+    private class RemoveNoteButtonActionListener implements ActionListener {
+        private JList<Note> notesList;
+
+        RemoveNoteButtonActionListener(JList<Note> notesList) {
+            this.notesList = notesList;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Note note = notesList.getSelectedValue();
+            if (note == null) {
+                return;
+            }
+
+            model.removeNote(note);
+            view.update();
+        }
+    }
+
+
     private class ExitButtonButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -264,11 +345,32 @@ public class Controller {
         }
     }
 
+    private class SettingsButtonButtonActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        }
+    }
+
+    private class StatisticsButtonButtonActionListener implements ActionListener {
+        private Controller controller;
+
+        StatisticsButtonButtonActionListener(Controller controller) {
+            this.controller = controller;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new StatisticsDialog(controller);
+        }
+    }
+
     private class AboutButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            JLabel messageLabel = new JLabel(model.readTextFromFile("about.txt"));
+            messageLabel.setFont(new Font("Monospased", Font.PLAIN, 14));
             JOptionPane.showMessageDialog(view,
-                    model.readTextFromFile("about.txt"),
+                    messageLabel,
                     "О программе", JOptionPane.PLAIN_MESSAGE);
         }
     }
@@ -276,12 +378,11 @@ public class Controller {
     private class UsingRulesButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            JTextArea messageTextArea = new JTextArea(model.readTextFromFile("using_rules.txt"));
-            messageTextArea.setEditable(false);
-            messageTextArea.setRows(150);
-
-            JScrollPane scrollPane = new JScrollPane(messageTextArea);
-            scrollPane.setSize(new Dimension(300, 500));
+            JLabel messageLabel = new JLabel(model.readTextFromFile("using_rules.txt"));
+            //messageTextArea.setEditable(false);
+            messageLabel.setFont(new Font("Monospased", Font.PLAIN, 12));
+            JScrollPane scrollPane = new JScrollPane(messageLabel);
+            scrollPane.setPreferredSize(new Dimension(600, 500));
 
             JOptionPane.showMessageDialog(view,
                     scrollPane,
@@ -540,4 +641,45 @@ public class Controller {
         }
     }
 
+    private class StatisticsDialogPeriodComboBoxItemListener implements ItemListener {
+        private StatisticsDialog dialog;
+
+        StatisticsDialogPeriodComboBoxItemListener(StatisticsDialog dialog) {
+            this.dialog = dialog;
+        }
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (!(e.getSource() instanceof JComboBox)) {
+                return;
+            }
+
+            JComboBox<String> periodComboBox = (JComboBox) e.getSource();
+            String period = (String) periodComboBox.getSelectedItem();
+
+            dialog.setSelectedPeriod(period);
+            dialog.update();
+        }
+    }
+
+    private class StatisticsDialogItemTypeComboBoxItemListener implements ItemListener {
+        private StatisticsDialog dialog;
+
+        StatisticsDialogItemTypeComboBoxItemListener(StatisticsDialog dialog) {
+            this.dialog = dialog;
+        }
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (!(e.getSource() instanceof JComboBox)) {
+                return;
+            }
+
+            JComboBox<SimpleData> periodComboBox = (JComboBox) e.getSource();
+            int typeID = ((SimpleData) periodComboBox.getSelectedItem()).getId();
+
+            dialog.setSelectedItemType(typeID);
+            dialog.update();
+        }
+    }
 }

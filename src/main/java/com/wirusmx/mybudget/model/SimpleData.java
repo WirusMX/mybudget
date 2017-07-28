@@ -1,5 +1,8 @@
 package com.wirusmx.mybudget.model;
 
+/**
+ * @author Piunov M (aka WirusMX)
+ */
 public class SimpleData {
     private final int id;
     private final String title;

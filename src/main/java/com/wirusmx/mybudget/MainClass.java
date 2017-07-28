@@ -9,6 +9,8 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 /**
  * Main class of application. Contains <code>public static void main(String[] args)</code>
  * method and nothing else.
+ *
+ * @author Piunov M (aka WirusMX)
  */
 public class MainClass {
     public static void main(String[] args) {

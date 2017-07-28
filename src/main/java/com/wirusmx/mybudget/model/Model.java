@@ -14,6 +14,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * @author Piunov M (aka WirusMX)
+ */
 public class Model {
     private static final String USER_SETTINGS_PROPERTIES_PATH = "conf/user_settings.properties";
     private static final String TEXT_FILES_PREFIX = "/text/";
@@ -22,6 +25,7 @@ public class Model {
 
     private JdbcTemplate template;
     private Controller controller;
+    private String applicationVersion;
 
     private Properties userSettings;
 
@@ -33,9 +37,10 @@ public class Model {
     private int selectedSortOrder = MyComparator.REVERSE_ORDER;
     private String searchQuery = "";
 
-    public Model(JdbcTemplate template, Controller controller) {
+    public Model(JdbcTemplate template, Controller controller, String applicationVersion) {
         this.template = template;
         this.controller = controller;
+        this.applicationVersion = applicationVersion;
     }
 
     public int getSelectedPeriodType() {
@@ -95,6 +100,9 @@ public class Model {
                 "title TEXT);");
         template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее')");
 
+        template.execute("CREATE TABLE IF NOT EXISTS application (version TEXT)");
+        template.execute("INSERT OR REPLACE INTO application (version) VALUES ('" + applicationVersion + "')");
+
         userSettings = new Properties();
         if (new java.io.File(USER_SETTINGS_PROPERTIES_PATH).exists()) {
             try {
@@ -135,7 +143,7 @@ public class Model {
         return values;
     }
 
-    public int insertNewValue(String value, String table) {
+    public int insertNewComboBoxValue(String value, String table) {
         template.execute("INSERT OR REPLACE INTO " + table + " (title) VALUES ('" + value + "');");
         return template.queryForObject("SELECT id from " + table + " WHERE title LIKE '" + value + "';", Integer.class);
     }
@@ -154,11 +162,85 @@ public class Model {
                 + "'" + note.getDay() + "', "
                 + "'" + note.getMonth() + "', "
                 + "'" + note.getYear() + "');");
+    }
 
+    public List<Note> getNotes(int selectedPeriodType, String selectedPeriod){
+        return getNotes(selectedPeriodType, selectedPeriod, -1, "");
     }
 
     public List<Note> getNotes() {
+        return getNotes(selectedPeriodType, selectedPeriod, selectedSortType, searchQuery);
+    }
 
+    public void updateNote(Note note) {
+        template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, shopID, " +
+                "necessityID, qualityID, bySale, day, month, year) " +
+                "VALUES ("
+                + note.getId() + ", "
+                + "'" + note.getItem() + "', "
+                + note.getType().getId() + ", "
+                + note.getPrice() + ", "
+                + note.getShop().getId() + ", "
+                + note.getNecessity().getId() + ", "
+                + note.getQuality().getId() + ", "
+                + (note.isBySale() ? 1 : 0) + ", "
+                + "'" + note.getDay() + "', "
+                + "'" + note.getMonth() + "', "
+                + "'" + note.getYear() + "');");
+    }
+
+    public void removeNote(Note note) {
+        template.execute("DELETE FROM product WHERE id=" + note.getId() + ";");
+    }
+
+    public String readTextFromFile(String fileName) {
+        String result = "";
+
+        try (BufferedReader reader
+                     = new BufferedReader(
+                new InputStreamReader(
+                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result += line + "\n";
+            }
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return result;
+    }
+
+    public ImageIcon getImage(String fileName) {
+        ImageIcon image = null;
+
+        try {
+            image = new ImageIcon(getClass().getResource(IMAGES_FILES_PREFIX + fileName + IMAGES_FILES_EXT));
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+        return image;
+    }
+
+    public Set<String> getPeriods(int selectedPeriodType){
+        switch (selectedPeriodType) {
+            case PeriodType.YEAR:
+                return getYears();
+            case PeriodType.MONTH:
+                return getMonths();
+            case PeriodType.DAY:
+                return getDays();
+        }
+
+        return new TreeSet<>();
+    }
+
+    public Set<String> getPeriods() {
+        return getPeriods(selectedPeriodType);
+    }
+
+
+
+    private List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery){
         String period = "";
 
         List<Note> result = new ArrayList<>();
@@ -201,7 +283,9 @@ public class Model {
             DefaultExceptionHandler.handleException(ex);
         }
 
-        Collections.sort(result, comparators[selectedSortType]);
+        if (selectedSortType >=0 && selectedSortType < comparators.length) {
+            Collections.sort(result, comparators[selectedSortType]);
+        }
 
         if (!"".equals(searchQuery)) {
             List<Note> temp = new ArrayList<>();
@@ -217,64 +301,6 @@ public class Model {
         }
 
         return result;
-    }
-
-    public void updateNote(Note note) {
-        template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, shopID, " +
-                "necessityID, qualityID, bySale, day, month, year) " +
-                "VALUES ("
-                + note.getId() + ", "
-                + "'" + note.getItem() + "', "
-                + note.getType().getId() + ", "
-                + note.getPrice() + ", "
-                + note.getShop().getId() + ", "
-                + note.getNecessity().getId() + ", "
-                + note.getQuality().getId() + ", "
-                + (note.isBySale() ? 1 : 0) + ", "
-                + "'" + note.getDay() + "', "
-                + "'" + note.getMonth() + "', "
-                + "'" + note.getYear() + "');");
-    }
-
-    public String readTextFromFile(String fileName) {
-        String result = "";
-
-        try (BufferedReader reader
-                     = new BufferedReader(
-                new InputStreamReader(
-                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName)))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result += line + "\n";
-            }
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-        return result;
-    }
-
-    public ImageIcon getImage(String fileName) {
-        ImageIcon image = null;
-
-        try {
-            image = new ImageIcon(getClass().getResource(IMAGES_FILES_PREFIX + fileName + IMAGES_FILES_EXT));
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-        return image;
-    }
-
-    public Set<String> getPeriods() {
-        switch (selectedPeriodType) {
-            case PeriodType.YEAR:
-                return getYears();
-            case PeriodType.MONTH:
-                return getMonths();
-            case PeriodType.DAY:
-                return getDays();
-        }
-
-        return new TreeSet<>();
     }
 
     private Set<String> getYears() {
@@ -345,7 +371,6 @@ public class Model {
         }
     }
 
-
     private class ComboBoxValuesComparator implements Comparator<SimpleData> {
         @Override
         public int compare(SimpleData o1, SimpleData o2) {
@@ -361,7 +386,7 @@ public class Model {
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
+
     public static class PeriodType {
         public static final int ALL = 0;
         public static final int YEAR = 1;
@@ -369,7 +394,6 @@ public class Model {
         public static final int DAY = 3;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static class SortType {
         public static final int DATE = 0;
         public static final int ITEM = 1;

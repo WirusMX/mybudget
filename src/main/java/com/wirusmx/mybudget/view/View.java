@@ -9,9 +9,13 @@ import com.wirusmx.mybudget.model.comparators.MyComparator;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Set;
 
+/**
+ * @author Piunov M (aka WirusMX)
+ */
 public class View extends JFrame {
     private Controller controller;
     private String applicationTitle;
@@ -29,6 +33,13 @@ public class View extends JFrame {
     }
 
     public void init() {
+/*
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+
+        }
+*/
         setTitle(applicationTitle + " v." + applicationVersion);
         setIconImage(controller.getImage("favicon").getImage());
         setBounds(0, 0, 1024, 600);
@@ -61,6 +72,7 @@ public class View extends JFrame {
         });
 
         notesList.addMouseListener(controller.getEditNoteActionListener(notesList));
+        notesList.setComponentPopupMenu(getNotesListPopupMenu());
 
         JMenuBar mainMenu = new JMenuBar();
 
@@ -105,43 +117,113 @@ public class View extends JFrame {
                 necSum[1] + " руб. - низкой необходимости");
     }
 
+    public void setPeriodComboBoxValues(JComboBox<String> periodComboBox, int periodType) {
+        periodComboBox.setVisible(periodType != Model.PeriodType.ALL);
+        periodComboBox.removeAllItems();
+
+        Set<String> values = controller.getPeriods();
+
+        int pos = -1;
+        int i = 0;
+        for (String s : values) {
+            periodComboBox.addItem(s);
+            if (controller.getSelectedPeriod().equals(s)) {
+                pos = i;
+            }
+            i++;
+        }
+
+        periodComboBox.setSelectedIndex(pos);
+    }
+
     private void addMainMenu(JMenuBar menuBar) {
 
         JMenu fileMenu = new JMenu("Файл");
 
-        JMenuItem newNoteMenuItem = new JMenuItem("Новая запись");
-        newNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        newNoteMenuItem.addActionListener(controller.getAddNewNoteButtonActionListener());
-        newNoteMenuItem.setIcon(controller.getImage("new"));
-        fileMenu.add(newNoteMenuItem);
+        fileMenu.add(
+                getMenuItem(
+                        "Новая запись",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK),
+                        controller.getAddNewNoteButtonActionListener(),
+                        "new"
+                )
+        );
 
-        JMenuItem editNoteMenuItem = new JMenuItem("Изменить запись");
-        editNoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
-        editNoteMenuItem.addActionListener(controller.getEditNoteActionListener(notesList));
-        editNoteMenuItem.setIcon(controller.getImage("edit"));
-        fileMenu.add(editNoteMenuItem);
+        fileMenu.add(
+                getMenuItem(
+                        "Изменить запись",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
+                        controller.getEditNoteActionListener(notesList),
+                        "edit"
+                )
+        );
+
+        fileMenu.add(
+                getMenuItem(
+                        "Удалить запись",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
+                        controller.getRemoveNoteButtonActionListener(notesList),
+                        "remove"
+                )
+        );
 
         fileMenu.addSeparator();
 
-        JMenuItem exitMenuItem = new JMenuItem("Выход");
-        exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.ALT_MASK));
-        exitMenuItem.addActionListener(controller.getExitButtonButtonActionListener());
-        exitMenuItem.setIcon(controller.getImage("exit"));
-        fileMenu.add(exitMenuItem);
+        fileMenu.add(
+                getMenuItem(
+                        "Выход",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.ALT_MASK),
+                        controller.getExitButtonButtonActionListener(),
+                        "exit"
+                )
+        );
 
         menuBar.add(fileMenu);
 
+        JMenu toolsMenu = new JMenu("Инструменты");
+
+        toolsMenu.add(
+                getMenuItem(
+                        "Статистика",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK),
+                        controller.getStatisticsButtonButtonActionListener(),
+                        "stat"
+                )
+        );
+
+        toolsMenu.addSeparator();
+
+        /*
+        toolsMenu.add(
+                getMenuItem(
+                        "Настройки",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK),
+                        controller.getSettingsButtonButtonActionListener(),
+                        "settings"
+                )
+        );*/
+
+        menuBar.add(toolsMenu);
+
         JMenu infoMenu = new JMenu("Справка");
 
-        JMenuItem aboutMenuItem = new JMenuItem("О программе");
-        aboutMenuItem.addActionListener(controller.getAboutButtonActionListener());
-        aboutMenuItem.setIcon(controller.getImage("about"));
-        infoMenu.add(aboutMenuItem);
+        infoMenu.add(
+                getMenuItem(
+                        "О программе",
+                        null,
+                        controller.getAboutButtonActionListener(),
+                        "about"
+                )
+        );
 
-        JMenuItem usingRulesMenuItem = new JMenuItem("Правила пользования ПО");
-        usingRulesMenuItem.addActionListener(controller.getUsingRulesButtonActionListener());
-        usingRulesMenuItem.setIcon(controller.getImage("using_rules"));
-        infoMenu.add(usingRulesMenuItem);
+        infoMenu.add(
+                getMenuItem(
+                        "Правила пользования ПО",
+                        null,
+                        controller.getUsingRulesButtonActionListener(),
+                        "using_rules"
+                )
+        );
 
         menuBar.add(infoMenu);
 
@@ -204,26 +286,51 @@ public class View extends JFrame {
         JButton resetButton = new JButton("Сбросить");
         resetButton.addActionListener(controller.getResetButtonActionListener(searchTextField));
         menuBar.add(resetButton);
-
-        //getContentPane().add(menuBar, BorderLayout.SOUTH);
     }
 
-    public void setPeriodComboBoxValues(JComboBox<String> periodComboBox, int periodType) {
-        periodComboBox.setVisible(periodType != Model.PeriodType.ALL);
-        periodComboBox.removeAllItems();
+    private JPopupMenu getNotesListPopupMenu() {
+        JPopupMenu popupMenu = new JPopupMenu();
 
-        Set<String> values = controller.getPeriods();
+        popupMenu.add(
+                getMenuItem(
+                        "Новая запись",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK),
+                        controller.getAddNewNoteButtonActionListener(),
+                        "new"
+                )
+        );
 
-        int pos = -1;
-        int i = 0;
-        for (String s : values) {
-            periodComboBox.addItem(s);
-            if (controller.getSelectedPeriod().equals(s)) {
-                pos = i;
-            }
-            i++;
+        popupMenu.add(
+                getMenuItem(
+                        "Изменить запись",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
+                        controller.getEditNoteActionListener(notesList),
+                        "edit"
+                )
+        );
+
+        popupMenu.add(
+                getMenuItem(
+                        "Удалить запись",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
+                        controller.getRemoveNoteButtonActionListener(notesList),
+                        "remove"
+                )
+        );
+
+        return popupMenu;
+    }
+
+    private JMenuItem getMenuItem(String title, KeyStroke keyStroke, ActionListener actionListener, String imageName) {
+        JMenuItem menuItem = new JMenuItem(title);
+        if (keyStroke != null) {
+            menuItem.setAccelerator(keyStroke);
         }
-
-        periodComboBox.setSelectedIndex(pos);
+        menuItem.addActionListener(actionListener);
+        if (imageName != null) {
+            menuItem.setIcon(controller.getImage(imageName));
+        }
+        return menuItem;
     }
+
 }

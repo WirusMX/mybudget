@@ -25,6 +25,7 @@
             </bean>
         </constructor-arg>
         <constructor-arg name="controller" ref="controller"/>
+        <constructor-arg name="applicationVersion" value="${project.version}"/>
     </bean>
 
 </beans>

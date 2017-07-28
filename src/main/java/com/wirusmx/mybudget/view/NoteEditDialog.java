@@ -8,6 +8,9 @@ import com.wirusmx.mybudget.model.SimpleData;
 import javax.swing.*;
 import java.util.Set;
 
+/**
+ * @author Piunov M (aka WirusMX)
+ */
 public class NoteEditDialog extends JDialog {
 
     private static final int FIRST_COL_X_POS = 10;

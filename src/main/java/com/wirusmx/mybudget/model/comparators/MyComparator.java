@@ -6,6 +6,7 @@ import java.util.Comparator;
  * Notes comparator base class.
  *
  * @param <Note>
+ * @author Piunov M (aka WirusMX)
  */
 public abstract class MyComparator<Note> implements Comparator<Note> {
 
