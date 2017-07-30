@@ -3,8 +3,8 @@ package com.wirusmx.mybudget.controller;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
-import com.wirusmx.mybudget.view.NoteEditDialog;
-import com.wirusmx.mybudget.view.StatisticsDialog;
+import com.wirusmx.mybudget.view.dialogs.NoteEditDialog;
+import com.wirusmx.mybudget.view.dialogs.StatisticsDialog;
 import com.wirusmx.mybudget.view.View;
 
 import javax.swing.*;
@@ -164,8 +164,8 @@ public class Controller {
         return resetButtonActionListener;
     }
 
-    public NumericTextFieldFocusListener getNumericTextFieldFocusListener(String defaultValue) {
-        return new NumericTextFieldFocusListener(defaultValue);
+    public NumericTextFieldFocusListener getNumericTextFieldFocusListener(Class type, String defaultValue) {
+        return new NumericTextFieldFocusListener(type, defaultValue);
     }
 
     public NoteEditDialogComboBoxItemListener getNoteEditDialogComboBoxItemListener(JDialog dialog, String table) {
@@ -224,10 +224,10 @@ public class Controller {
         return model.getImage(fileName);
     }
 
-    public int[][] getStatistics(int periodType, String period, int itemType) {
-        int[][] result;
+    public float[][] getStatistics(int periodType, String period, int itemType) {
+        float[][] result;
         if (periodType == Model.PeriodType.YEAR) {
-            result = new int[3][12];
+            result = new float[3][12];
 
             List<Note> notes = model.getNotes(periodType, period);
 
@@ -238,12 +238,15 @@ public class Controller {
                 }
             }
         } else {
-            result = new int[3][0];
+            result = new float[3][0];
         }
 
         return result;
     }
 
+    public void showErrorMessage(Throwable ex) {
+
+    }
 
     private class AddNewNoteButtonActionListener implements ActionListener {
         private Controller controller;
@@ -498,9 +501,11 @@ public class Controller {
 
     private class NumericTextFieldFocusListener implements FocusListener {
         private String defaultValue;
+        private Class type;
 
-        NumericTextFieldFocusListener(String defaultValue) {
+        NumericTextFieldFocusListener(Class type, String defaultValue) {
             this.defaultValue = defaultValue;
+            this.type = type;
         }
 
         @Override
@@ -518,9 +523,7 @@ public class Controller {
 
             String text = textField.getText();
 
-            if (!text.matches("\\d+")) {
-                text = text.replaceAll("\\D", "");
-            }
+            text = model.stringToNumericFormat(type, text);
 
             if (text.length() == 0) {
                 text = defaultValue;
@@ -612,7 +615,7 @@ public class Controller {
             }
 
             note.update(itemNameTextField.getText(), (SimpleData) itemTypeComboBox.getSelectedItem(),
-                    Integer.parseInt(itemPriceTextField.getText()), (SimpleData) shopComboBox.getSelectedItem(),
+                    Float.parseFloat(itemPriceTextField.getText()), (SimpleData) shopComboBox.getSelectedItem(),
                     (SimpleData) necessityLevelComboBox.getSelectedItem(), (SimpleData) qualityLevelComboBox.getSelectedItem(),
                     saleCheckBox.isSelected(), dayTextField.getText(), monthTextField.getText(), yearTextField.getText());
 

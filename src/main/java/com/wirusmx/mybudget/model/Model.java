@@ -88,7 +88,7 @@ public class Model {
 
     public void init() {
         template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                "itemTitle TEXT, typeID INTEGER, price INTEGER, shopID INTEGER, " +
+                "itemTitle TEXT, typeID INTEGER, price REAL, shopID INTEGER, " +
                 "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
                 "month TEXT, year TEXT);");
 
@@ -164,7 +164,7 @@ public class Model {
                 + "'" + note.getYear() + "');");
     }
 
-    public List<Note> getNotes(int selectedPeriodType, String selectedPeriod){
+    public List<Note> getNotes(int selectedPeriodType, String selectedPeriod) {
         return getNotes(selectedPeriodType, selectedPeriod, -1, "");
     }
 
@@ -221,7 +221,7 @@ public class Model {
         return image;
     }
 
-    public Set<String> getPeriods(int selectedPeriodType){
+    public Set<String> getPeriods(int selectedPeriodType) {
         switch (selectedPeriodType) {
             case PeriodType.YEAR:
                 return getYears();
@@ -238,9 +238,57 @@ public class Model {
         return getPeriods(selectedPeriodType);
     }
 
+    public String stringToNumericFormat(Class type, String value) {
+        if (type.equals(Float.class)) {
+            return stringToFloatFormat(value);
+        }
 
+        if (type.equals(Integer.class)) {
+            return stringToIntegerFormat(value);
+        }
 
-    private List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery){
+        return "";
+    }
+
+    private String stringToFloatFormat(String text) {
+        if (!text.matches("\\d+")) {
+            text = text.replaceAll(",", ".");
+            text = text.replaceAll("[^0-9.]", "");
+            while (text.split("\\.").length > 2) {
+                text = text.replaceFirst("\\.", "");
+            }
+
+            int pos = text.indexOf('.');
+            if (pos >= 0 && text.length() - pos > 3) {
+                text = text.substring(0, pos + 3);
+            }
+
+            if (pos == text.length() - 1 && text.length() - 1 > 0){
+                text = text.substring(0, pos);
+            }
+
+            if (pos == 0 && text.length() > 1){
+                text = "0" + text;
+            }
+
+            if (pos == 0 && text.length() - 1 == 0){
+                text = "";
+            }
+        }
+
+        return text;
+    }
+
+    private String stringToIntegerFormat(String text) {
+        if (!text.matches("\\d+")) {
+            text.replaceAll("\\D", "");
+        }
+
+        return text;
+
+    }
+
+    private List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery) {
         String period = "";
 
         List<Note> result = new ArrayList<>();
@@ -268,7 +316,7 @@ public class Model {
                     return new Note(resultSet.getInt("id"),
                             resultSet.getString("itemTitle"),
                             new SimpleData(resultSet.getInt("typeID"), resultSet.getString(15)),
-                            resultSet.getInt("price"),
+                            resultSet.getFloat("price"),
                             new SimpleData(resultSet.getInt("shopID"), resultSet.getString(13)),
                             new SimpleData(resultSet.getInt("necessityID"), ""),
                             new SimpleData(resultSet.getInt("qualityID"), ""),
@@ -283,7 +331,7 @@ public class Model {
             DefaultExceptionHandler.handleException(ex);
         }
 
-        if (selectedSortType >=0 && selectedSortType < comparators.length) {
+        if (selectedSortType >= 0 && selectedSortType < comparators.length) {
             Collections.sort(result, comparators[selectedSortType]);
         }
 

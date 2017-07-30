@@ -1,4 +1,4 @@
-package com.wirusmx.mybudget.view;
+package com.wirusmx.mybudget.view.dialogs;
 
 import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.Model;
@@ -38,9 +38,10 @@ public class StatisticsDialog extends JDialog {
     }
 
     private void init() {
-        setSize(950, 600);
+        setSize(1000, 600);
         setModal(true);
         setLocationRelativeTo(null);
+        setIconImage(controller.getImage("stat").getImage());
 
         setLayout(new BorderLayout(3, 3));
 
@@ -99,7 +100,7 @@ public class StatisticsDialog extends JDialog {
         //table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(getWidth(), 100));
+        scrollPane.setPreferredSize(new Dimension(getWidth(), 75));
 
         add(scrollPane, BorderLayout.SOUTH);
 
@@ -118,7 +119,7 @@ public class StatisticsDialog extends JDialog {
         tableModel.setColumnIdentifiers(new String[]{" ", "01", "02", "03", "04", "05", "06", "07", "08", "09",
                 "10", "11", "12"});
 
-        int[][] values = controller.getStatistics(selectedPeriodType, selectedPeriod, selectedItemType);
+        float[][] values = controller.getStatistics(selectedPeriodType, selectedPeriod, selectedItemType);
         String[] rowHeaders = new String[]{"Выс. необх.", "Низк. необх.", "Всего"};
 
         for (int i = tableModel.getRowCount() - 1; i >= 0; i--){
@@ -146,10 +147,10 @@ public class StatisticsDialog extends JDialog {
         int[] x = new int[12];
         int[] y = new int[11];
 
-        int[][] values = controller.getStatistics(selectedPeriodType, selectedPeriod, selectedItemType);
+        float[][] values = controller.getStatistics(selectedPeriodType, selectedPeriod, selectedItemType);
 
-        int maxValue = values[2][0];
-        for (int i : values[2]) {
+        float maxValue = values[2][0];
+        for (float i : values[2]) {
             if (i > maxValue) {
                 maxValue = i;
             }
@@ -248,7 +249,7 @@ public class StatisticsDialog extends JDialog {
 
     }
 
-    private void drawStatistics(Graphics2D graphics, int[] x, int hundredPercent, int[][] values, double maxValue, int y0) {
+    private void drawStatistics(Graphics2D graphics, int[] x, int hundredPercent, float[][] values, float maxValue, int y0) {
         Color[] colors = new Color[]{Color.GREEN, Color.RED, Color.BLUE};
         for (int j = 0; j < 3; j++) {
             int prevX = 0;
@@ -256,7 +257,7 @@ public class StatisticsDialog extends JDialog {
             for (int i = 0; i < x.length; i++) {
                 graphics.setColor(colors[j]);
                 int currentX = x[i];
-                int currentY = y0 - (int) ((((double) values[j][i]) / maxValue) * hundredPercent);
+                int currentY = y0 - (int) (((values[j][i]) / maxValue) * hundredPercent);
                 graphics.fillOval(currentX - 5, currentY - 7, 10, 10);
                 if (i > 0) {
                     graphics.drawLine(prevX, prevY, currentX, currentY);

@@ -1,4 +1,4 @@
-package com.wirusmx.mybudget.view;
+package com.wirusmx.mybudget.view.dialogs;
 
 import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.Model;
@@ -85,8 +85,8 @@ public class NoteEditDialog extends JDialog {
         label3.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * 2, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label3);
 
-        JTextField itemPriceTextField = new JTextField("" + note.getPrice());
-        itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener("0"));
+        JTextField itemPriceTextField = new JTextField("" + note.getPriceAsString());
+        itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
 
         itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 2, secondColElementWidth, ELEMENT_HEIGHT);
         add(itemPriceTextField);
@@ -136,17 +136,17 @@ public class NoteEditDialog extends JDialog {
         add(label7);
 
         JTextField dayTextField = new JTextField(note.getDay());
-        dayTextField.addFocusListener(controller.getNumericTextFieldFocusListener(note.getDay()));
+        dayTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getDay()));
         dayTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
         add(dayTextField);
 
         JTextField monthTextField = new JTextField(note.getMonth());
-        monthTextField.addFocusListener(controller.getNumericTextFieldFocusListener(note.getMonth()));
+        monthTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getMonth()));
         monthTextField.setBounds(SECOND_COL_X_POS + 35, Y0 + DELTA_Y * 7, 30, ELEMENT_HEIGHT);
         add(monthTextField);
 
         JTextField yearTextField = new JTextField(note.getYear());
-        yearTextField.addFocusListener(controller.getNumericTextFieldFocusListener(note.getYear()));
+        yearTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getYear()));
         yearTextField.setBounds(SECOND_COL_X_POS + 70, Y0 + DELTA_Y * 7, 60, ELEMENT_HEIGHT);
         add(yearTextField);
 

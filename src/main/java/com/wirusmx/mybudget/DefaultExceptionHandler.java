@@ -1,7 +1,12 @@
 package com.wirusmx.mybudget;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.wirusmx.mybudget.controller.Controller;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Class for handling exceptions by default
@@ -10,10 +15,32 @@ import java.util.Date;
  */
 public class DefaultExceptionHandler {
 
-    public static void handleException(Exception ex) {
+    private static Logger logger = Logger.getLogger(DefaultExceptionHandler.class);
 
-        System.out.println(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date())
-                + " Exception in module '" + ex.getStackTrace()[0]
-                + "': " + ex.getMessage());
+    private static boolean isLoggerReady = false;
+
+    static {
+        Properties loggerProperties = new Properties();
+        try {
+            loggerProperties.load(new FileInputStream("conf/log4j.properties"));
+            PropertyConfigurator.configure(loggerProperties);
+            isLoggerReady = true;
+        } catch (IOException ignored) {
+
+        }
+    }
+
+    public static void handleException(Throwable ex){
+        handleException(null, ex);
+    }
+
+    public static void handleException(Controller controller, Throwable ex){
+        if (isLoggerReady){
+            logger.error(ex.getMessage(), ex);
+        }
+
+        if (controller != null) {
+            controller.showErrorMessage(ex);
+        }
     }
 }

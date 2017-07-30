@@ -2,12 +2,15 @@ package com.wirusmx.mybudget.model;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 public class Note {
+    public static final String PRICE_FORMAT = "%.2f";
+
     private final int id;
     private String item;
     private SimpleData type;
-    private int price;
+    private float price;
     private SimpleData shop;
     private SimpleData necessity;
     private SimpleData quality;
@@ -33,7 +36,7 @@ public class Note {
 
     }
 
-    Note(int id, String item, SimpleData type, int price,
+    Note(int id, String item, SimpleData type, float price,
          SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
          String day, String month, String year) {
         this.id = id;
@@ -61,8 +64,12 @@ public class Note {
         return type;
     }
 
-    public int getPrice() {
+    public float getPrice() {
         return price;
+    }
+
+    public String getPriceAsString(){
+        return String.format(Locale.ENGLISH, PRICE_FORMAT, price);
     }
 
     public SimpleData getShop() {
@@ -93,7 +100,7 @@ public class Note {
         return year;
     }
 
-    public void update(String item, SimpleData type, int price,
+    public void update(String item, SimpleData type, float price,
                        SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
                        String day, String month, String year) {
         this.item = item;
@@ -108,15 +115,14 @@ public class Note {
         this.year = year;
     }
 
-
     @Override
     public String toString() {
-        String result = item + " (" + shop.getTitle() + ", " + price + " руб. ";
+        String result = item + " (" + shop.getTitle() + "; " + getPriceAsString() + " руб. ";
         if (bySale) {
             result += "(со скидкой)";
         }
 
-        result += ", " + day + "." + month + "." + year + ")";
+        result += "; " + day + "." + month + "." + year + ")";
 
         if (quality.getId() != Model.Quality.UNDEFINED) {
             result += "  ";

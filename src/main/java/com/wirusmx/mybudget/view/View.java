@@ -104,8 +104,8 @@ public class View extends JFrame {
 
         java.util.List<Note> notes = controller.getNotes();
 
-        int summ = 0;
-        int[] necSum = new int[2];
+        float summ = 0;
+        float[] necSum = new float[2];
 
         for (Note n : notes) {
             noteDefaultListModel.addElement(n);
@@ -113,8 +113,9 @@ public class View extends JFrame {
             necSum[n.getNecessity().getId()] += n.getPrice();
         }
 
-        statLabel.setText("Итого: " + summ + " руб., из них " + necSum[0] + " руб. на продукты высокой необходимости, " +
-                necSum[1] + " руб. - низкой необходимости");
+        statLabel.setText("Итого: " + String.format(Note.PRICE_FORMAT, summ) + " руб., из них "
+                + String.format(Note.PRICE_FORMAT, necSum[0]) + " руб. на продукты высокой необходимости, "
+                + String.format(Note.PRICE_FORMAT, necSum[1]) + " руб. - низкой необходимости");
     }
 
     public void setPeriodComboBoxValues(JComboBox<String> periodComboBox, int periodType) {
