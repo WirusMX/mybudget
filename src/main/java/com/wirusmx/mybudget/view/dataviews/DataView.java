@@ -10,18 +10,17 @@ import java.util.List;
 /**
  * @author Piunov M (aka WirusMX)
  */
-abstract class DataView extends JPanel {
-    private List<Note> notes;
+public abstract class DataView extends JPanel {
+    List<Note> notes;
 
-    DataView(List<Note> notes) {
-        this.notes = notes;
+    public DataView() {
         setLayout(new BorderLayout());
     }
 
     public void setNotes(List<Note> notes) {
         this.notes = notes;
         clearView();
-        updateView();
+        setViewValues();
     }
 
     public void clear() {
@@ -29,17 +28,13 @@ abstract class DataView extends JPanel {
         clearView();
     }
 
-    void setMouseListener(MouseListener mouseListener) {
-        setMouseListener(mouseListener);
-    }
+    public abstract void addMouseListener(MouseListener mouseListener);
 
-    void setPopupMenu(JPopupMenu popupMenu) {
-        setPopupMenu(popupMenu);
-    }
+    public abstract void setComponentPopupMenu(JPopupMenu popupMenu);
 
-    public abstract Note getSelectedNote();
+    public abstract Note getSelectedValue();
 
     abstract void clearView();
 
-    abstract void updateView();
+    abstract void setViewValues();
 }

@@ -1,10 +1,14 @@
 package com.wirusmx.mybudget.view;
 
+import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 import com.wirusmx.mybudget.model.comparators.MyComparator;
+import com.wirusmx.mybudget.view.dataviews.DataView;
+import com.wirusmx.mybudget.view.dataviews.ListView;
+import com.wirusmx.mybudget.view.dataviews.TableView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +18,8 @@ import java.awt.event.KeyEvent;
 import java.util.Set;
 
 /**
+ * Application main frame view.
+ *
  * @author Piunov M (aka WirusMX)
  */
 public class View extends JFrame {
@@ -21,15 +27,17 @@ public class View extends JFrame {
     private String applicationTitle;
     private String applicationVersion;
 
-    private JList<Note> notesList;
-    private DefaultListModel<Note> noteDefaultListModel;
-    private JLabel statLabel = new JLabel();
+    private Class[] dataViews;
 
+    private DataView currentDataView;
+    private JLabel statLabel = new JLabel();
+    private JPanel centerPanel;
 
     public View(Controller controller, String applicationTitle, String applicationVersion) {
         this.controller = controller;
         this.applicationTitle = applicationTitle;
         this.applicationVersion = applicationVersion;
+        dataViews = new Class[]{ListView.class, TableView.class};
     }
 
     public void init() {
@@ -47,49 +55,20 @@ public class View extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        noteDefaultListModel = new DefaultListModel<>();
-        notesList = new JList<>(noteDefaultListModel);
-        notesList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Note) {
-                    if (((Note) value).getNecessity().getId() == 1 && ((Note) value).isBySale()) {
-                        setBackground(Color.ORANGE);
-                    } else {
-                        if (((Note) value).isBySale()) {
-                            setBackground(Color.GREEN);
-                        } else {
-                            if (((Note) value).getNecessity().getId() == 1) {
-                                setBackground(Color.PINK);
-                            }
-                        }
-                    }
-                }
-
-                return c;
-            }
-        });
-
-        notesList.addMouseListener(controller.getEditNoteActionListener(notesList));
-        notesList.setComponentPopupMenu(getNotesListPopupMenu());
+        centerPanel = new JPanel(new BorderLayout());
+        setDataView(dataViews[controller.getDataViewID()]);
 
         JMenuBar mainMenu = new JMenuBar();
-
         addMainMenu(mainMenu);
 
         JMenuBar controlPanel = new JMenuBar();
-
         addControlPanel(controlPanel);
 
         JPanel panel = new JPanel(new BorderLayout(2, 2));
         panel.add(mainMenu, BorderLayout.NORTH);
         panel.add(controlPanel, BorderLayout.SOUTH);
-
         getContentPane().add(panel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(new JScrollPane(notesList), BorderLayout.CENTER);
         centerPanel.add(statLabel, BorderLayout.SOUTH);
         add(centerPanel);
 
@@ -100,15 +79,14 @@ public class View extends JFrame {
 
 
     public void update() {
-        noteDefaultListModel.clear();
 
         java.util.List<Note> notes = controller.getNotes();
+        currentDataView.setNotes(notes);
 
         float summ = 0;
         float[] necSum = new float[2];
 
         for (Note n : notes) {
-            noteDefaultListModel.addElement(n);
             summ += n.getPrice();
             necSum[n.getNecessity().getId()] += n.getPrice();
         }
@@ -116,6 +94,25 @@ public class View extends JFrame {
         statLabel.setText("Итого: " + String.format(Note.PRICE_FORMAT, summ) + " руб., из них "
                 + String.format(Note.PRICE_FORMAT, necSum[0]) + " руб. на продукты высокой необходимости, "
                 + String.format(Note.PRICE_FORMAT, necSum[1]) + " руб. - низкой необходимости");
+    }
+
+    public void setDataView(Class<DataView> dataView) {
+        try {
+            if (currentDataView != null) {
+                centerPanel.remove(currentDataView);
+            }
+
+            currentDataView = dataView.newInstance();
+
+            currentDataView.addMouseListener(controller.getEditNoteActionListener(currentDataView));
+            currentDataView.setComponentPopupMenu(getNotesListPopupMenu());
+
+            centerPanel.add(currentDataView, BorderLayout.CENTER);
+            revalidate();
+            repaint();
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
     }
 
     public void setPeriodComboBoxValues(JComboBox<String> periodComboBox, int periodType) {
@@ -154,7 +151,7 @@ public class View extends JFrame {
                 getMenuItem(
                         "Изменить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
-                        controller.getEditNoteActionListener(notesList),
+                        controller.getEditNoteActionListener(currentDataView),
                         "edit"
                 )
         );
@@ -163,7 +160,7 @@ public class View extends JFrame {
                 getMenuItem(
                         "Удалить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
-                        controller.getRemoveNoteButtonActionListener(notesList),
+                        controller.getRemoveNoteButtonActionListener(currentDataView),
                         "remove"
                 )
         );
@@ -181,13 +178,35 @@ public class View extends JFrame {
 
         menuBar.add(fileMenu);
 
+        JMenu viewMenu = new JMenu("Вид");
+
+        viewMenu.add(
+                getMenuItem(
+                        "Список",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK),
+                        controller.getDataViewButtonActionListener(dataViews[0], 0),
+                        "list_view"
+                )
+        );
+
+        viewMenu.add(
+                getMenuItem(
+                        "Таблица",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK),
+                        controller.getDataViewButtonActionListener(dataViews[1], 1),
+                        "table_view"
+                )
+        );
+
+        menuBar.add(viewMenu);
+
         JMenu toolsMenu = new JMenu("Инструменты");
 
         toolsMenu.add(
                 getMenuItem(
                         "Статистика",
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK),
-                        controller.getStatisticsButtonButtonActionListener(),
+                        controller.getStatisticsButtonActionListener(),
                         "stat"
                 )
         );
@@ -199,7 +218,7 @@ public class View extends JFrame {
                 getMenuItem(
                         "Настройки",
                         KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK),
-                        controller.getSettingsButtonButtonActionListener(),
+                        controller.getSettingsButtonActionListener(),
                         "settings"
                 )
         );*/
@@ -254,13 +273,12 @@ public class View extends JFrame {
         menuBar.add(new JLabel("Сортировка: "));
         JComboBox<SimpleData> sortTypeComboBox = new JComboBox<>();
         sortTypeComboBox.addItem(new SimpleData(Model.SortType.DATE, "Дата"));
-        sortTypeComboBox.addItem(new SimpleData(Model.SortType.ITEM, "Продукт"));
-        /*
-        sortTypeComboBox.addItem(new SimpleData(SortType.TYPE, "Категория"));
-        sortTypeComboBox.addItem(new SimpleData(SortType.PRICE, "Цена"));
-        sortTypeComboBox.addItem(new SimpleData(SortType.SHOP, "Магазин"));
-        sortTypeComboBox.addItem(new SimpleData(SortType.BY_SALE, "Скидка"));
-        */
+        sortTypeComboBox.addItem(new SimpleData(Model.SortType.ITEM, "Товар"));
+        sortTypeComboBox.addItem(new SimpleData(Model.SortType.TYPE, "Категория"));
+        sortTypeComboBox.addItem(new SimpleData(Model.SortType.PRICE, "Цена"));
+        sortTypeComboBox.addItem(new SimpleData(Model.SortType.SHOP, "Магазин"));
+        sortTypeComboBox.addItem(new SimpleData(Model.SortType.BY_SALE, "Скидка"));
+
         sortTypeComboBox.setSelectedIndex(controller.getSelectedSortType());
         sortTypeComboBox.addItemListener(controller.getSortTypeComboBoxItemListener());
         menuBar.add(sortTypeComboBox);
@@ -305,7 +323,7 @@ public class View extends JFrame {
                 getMenuItem(
                         "Изменить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
-                        controller.getEditNoteActionListener(notesList),
+                        controller.getEditNoteActionListener(currentDataView),
                         "edit"
                 )
         );
@@ -314,7 +332,7 @@ public class View extends JFrame {
                 getMenuItem(
                         "Удалить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
-                        controller.getRemoveNoteButtonActionListener(notesList),
+                        controller.getRemoveNoteButtonActionListener(currentDataView),
                         "remove"
                 )
         );

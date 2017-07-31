@@ -1,0 +1,109 @@
+package com.wirusmx.mybudget.view.dataviews;
+
+import com.wirusmx.mybudget.model.Model;
+import com.wirusmx.mybudget.model.Note;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseListener;
+
+/**
+ * Class represents <code>Note</code>s as JTable.
+ *
+ * @author Piunov M (aka WirusMX)
+ */
+public class TableView extends DataView {
+    private final String[] tableHeader = new String[]{
+            "Товар",
+            "Магазин",
+            "Цена",
+            "Дата",
+            "Качество"
+    };
+
+    private DefaultTableModel tableModel;
+    private JTable table;
+
+    public TableView() {
+        tableModel = new DefaultTableModel();
+        table = new JTable(tableModel) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+        table.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        tableModel.setColumnIdentifiers(tableHeader);
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer(){
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                Note note = notes.get(row);
+
+                Color color = Color.WHITE;
+
+                if (note.getNecessity().getId() == Model.Necessity.LOW && note.isBySale()) {
+                    color = Color.ORANGE;
+                } else {
+                    if (note.isBySale()) {
+                        color = Color.GREEN;
+                    } else {
+                        if (note.getNecessity().getId() == Model.Necessity.LOW) {
+                            color = Color.PINK;
+                        }
+                    }
+                }
+
+                cell.setBackground(color);
+                return cell;
+            }
+
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++){
+            table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
+        }
+        add(new JScrollPane(table), BorderLayout.CENTER);
+    }
+
+    @Override
+    public void addMouseListener(MouseListener mouseListener) {
+        table.addMouseListener(mouseListener);
+    }
+
+    @Override
+    public void setComponentPopupMenu(JPopupMenu popupMenu) {
+        table.setComponentPopupMenu(popupMenu);
+    }
+
+    @Override
+    public Note getSelectedValue() {
+        return notes.get(table.getSelectedRow());
+    }
+
+    @Override
+    void clearView() {
+        int rowCount = tableModel.getRowCount();
+        for (int i = rowCount - 1; i >= 0; i--) {
+            tableModel.removeRow(i);
+        }
+    }
+
+    @Override
+    void setViewValues() {
+        for (Note n : notes) {
+            tableModel.addRow(
+                    new String[]{
+                            n.getItem(),
+                            n.getShop().toString(),
+                            n.getPriceAsString() + (n.isBySale() ? " (со скидкой)" : ""),
+                            n.getDate(),
+                            n.getQualityInStars()
+                    }
+            );
+        }
+    }
+}

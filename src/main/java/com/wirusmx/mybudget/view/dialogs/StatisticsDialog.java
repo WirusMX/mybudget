@@ -6,12 +6,13 @@ import com.wirusmx.mybudget.model.SimpleData;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.Set;
 
 /**
+ * Statistics dialog. Shows data like a graph.
+ *
  * @author Piunov M (aka WirusMX)
  */
 public class StatisticsDialog extends JDialog {
@@ -42,6 +43,11 @@ public class StatisticsDialog extends JDialog {
         setModal(true);
         setLocationRelativeTo(null);
         setIconImage(controller.getImage("stat").getImage());
+        getRootPane().registerKeyboardAction(
+                controller.getCloseStatisticsDialogButtonActionListener(this),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
 
         setLayout(new BorderLayout(3, 3));
 
@@ -52,7 +58,7 @@ public class StatisticsDialog extends JDialog {
         JComboBox<SimpleData> itemTypeComboBox = new JComboBox<>();
         itemTypeComboBox.addItem(new SimpleData(-1, "все товары"));
         Set<SimpleData> itemTypes = controller.getComboBoxValues("item_types");
-        for (SimpleData sd: itemTypes){
+        for (SimpleData sd : itemTypes) {
             itemTypeComboBox.addItem(sd);
         }
         itemTypeComboBox.addItemListener(controller.getStatisticsDialogItemTypeComboBoxItemListener(this));
@@ -64,7 +70,7 @@ public class StatisticsDialog extends JDialog {
 
         JComboBox<String> periodComboBox = new JComboBox<>();
         java.util.Set<String> periods = controller.getPeriods(selectedPeriodType);
-        for (String p: periods){
+        for (String p : periods) {
             periodComboBox.addItem(p);
         }
         periodComboBox.addItemListener(controller.getStatisticsDialogPeriodComboBoxItemListener(this));
@@ -97,7 +103,7 @@ public class StatisticsDialog extends JDialog {
             }
         };
 
-        //table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(getWidth(), 75));
@@ -122,7 +128,7 @@ public class StatisticsDialog extends JDialog {
         float[][] values = controller.getStatistics(selectedPeriodType, selectedPeriod, selectedItemType);
         String[] rowHeaders = new String[]{"Выс. необх.", "Низк. необх.", "Всего"};
 
-        for (int i = tableModel.getRowCount() - 1; i >= 0; i--){
+        for (int i = tableModel.getRowCount() - 1; i >= 0; i--) {
             tableModel.removeRow(i);
         }
 
@@ -231,7 +237,7 @@ public class StatisticsDialog extends JDialog {
         graphics.drawString("Расходы (тыс. руб.)", x0 + 10, yMin + 10);
     }
 
-    private void drawLegend(Graphics2D graphics, int x0, int y0, int xMax){
+    private void drawLegend(Graphics2D graphics, int x0, int y0, int xMax) {
         int lineY = y0 + 40;
         int labelY = y0 + 43;
         int offset = (xMax - x0) / 3;
@@ -240,7 +246,7 @@ public class StatisticsDialog extends JDialog {
 
         String[] labels = new String[]{" - высокой необходимости", " - низкой необходимости", " - всего"};
 
-        for (int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             graphics.setColor(colors[i]);
             graphics.drawLine(x0 + offset * i, lineY, x0 + offset * i + 20, lineY);
             graphics.setColor(Color.BLACK);
@@ -269,21 +275,4 @@ public class StatisticsDialog extends JDialog {
             }
         }
     }
-
-    private void updateColumnsWidth(JTable table) {
-        JTableHeader tableHeader = table.getTableHeader();
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            TableColumn column = table.getColumnModel().getColumn(i);
-            int preferredWidth =
-                    Math.round(
-                            (float) tableHeader.getFontMetrics(tableHeader.getFont()).
-                                    getStringBounds(tableHeader.getTable().getColumnName(i),
-                                            tableHeader.getGraphics()).getWidth());
-
-            column.setPreferredWidth(preferredWidth + 10);
-        }
-    }
-
-
-
 }

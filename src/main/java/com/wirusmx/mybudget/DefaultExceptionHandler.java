@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Class for handling exceptions by default
+ * Class for handling exceptions by default.
  *
  * @author Piunov M (aka WirusMX)
  */

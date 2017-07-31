@@ -68,7 +68,7 @@ public class Note {
         return price;
     }
 
-    public String getPriceAsString(){
+    public String getPriceAsString() {
         return String.format(Locale.ENGLISH, PRICE_FORMAT, price);
     }
 
@@ -82,6 +82,18 @@ public class Note {
 
     public SimpleData getQuality() {
         return quality;
+    }
+
+    public String getQualityInStars() {
+        String result = "";
+
+        if (quality.getId() != Model.Quality.UNDEFINED) {
+            for (int i = 0; i < 4 - quality.getId(); i++) {
+                result += "★";
+            }
+        }
+
+        return result;
     }
 
     public boolean isBySale() {
@@ -98,6 +110,10 @@ public class Note {
 
     public String getYear() {
         return year;
+    }
+
+    public String getDate() {
+        return day + "." + month + "." + year;
     }
 
     public void update(String item, SimpleData type, float price,
@@ -117,19 +133,14 @@ public class Note {
 
     @Override
     public String toString() {
-        String result = item + " (" + shop.getTitle() + "; " + getPriceAsString() + " руб. ";
+        String result = item + " (" + shop.getTitle() + "; " + getPriceAsString() + " руб.";
         if (bySale) {
-            result += "(со скидкой)";
+            result += " (со скидкой)";
         }
 
-        result += "; " + day + "." + month + "." + year + ")";
+        result += "; " + getDate() + ")";
 
-        if (quality.getId() != Model.Quality.UNDEFINED) {
-            result += "  ";
-            for (int i = 0; i < 4 - quality.getId(); i++) {
-                result += "★";
-            }
-        }
+        result += "  " + getQualityInStars();
 
         return result;
     }

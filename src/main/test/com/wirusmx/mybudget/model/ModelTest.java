@@ -22,6 +22,5 @@ public class ModelTest extends Assert {
 
         Assert.assertEquals("", model.stringToNumericFormat(Float.class, ""));
         Assert.assertEquals("", model.stringToNumericFormat(Float.class, "ddd.ccc"));
-
     }
 }

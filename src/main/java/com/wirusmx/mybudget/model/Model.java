@@ -2,9 +2,7 @@ package com.wirusmx.mybudget.model;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.controller.Controller;
-import com.wirusmx.mybudget.model.comparators.DateComparator;
-import com.wirusmx.mybudget.model.comparators.MyComparator;
-import com.wirusmx.mybudget.model.comparators.TitlesComparator;
+import com.wirusmx.mybudget.model.comparators.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -36,6 +34,7 @@ public class Model {
     private int selectedSortType = SortType.DATE;
     private int selectedSortOrder = MyComparator.REVERSE_ORDER;
     private String searchQuery = "";
+    private int dataViewID = 0;
 
     public Model(JdbcTemplate template, Controller controller, String applicationVersion) {
         this.template = template;
@@ -82,6 +81,15 @@ public class Model {
         }
     }
 
+    public int getDataViewID() {
+        return dataViewID;
+    }
+
+    public void setDataViewID(int dataViewID) {
+        this.dataViewID = dataViewID;
+        setUserSettingsValue("main.window.data.view.id", "" + dataViewID);
+    }
+
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
     }
@@ -119,9 +127,16 @@ public class Model {
         selectedSortOrder = Integer.parseInt(getUserSettingsValue("main.window.sort.order",
                 "" + selectedSortOrder));
 
+        dataViewID = Integer.parseInt(getUserSettingsValue("main.window.data.view.id",
+                "" + dataViewID));
+
         comparators = new MyComparator[]{
                 new DateComparator(selectedSortOrder),
-                new TitlesComparator(selectedSortOrder)
+                new TitlesComparator(selectedSortOrder),
+                new ItemTypeComparator(selectedSortOrder),
+                new PriceComparator(selectedSortOrder),
+                new ShopComparator(selectedSortOrder),
+                new SaleComparator(selectedSortOrder)
         };
     }
 

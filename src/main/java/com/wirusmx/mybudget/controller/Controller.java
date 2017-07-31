@@ -3,9 +3,10 @@ package com.wirusmx.mybudget.controller;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
+import com.wirusmx.mybudget.view.View;
+import com.wirusmx.mybudget.view.dataviews.DataView;
 import com.wirusmx.mybudget.view.dialogs.NoteEditDialog;
 import com.wirusmx.mybudget.view.dialogs.StatisticsDialog;
-import com.wirusmx.mybudget.view.View;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,11 +47,9 @@ public class Controller {
     }
 
     private AddNewNoteButtonActionListener addNewNoteButtonActionListener = null;
-    private EditNoteActionListener editNoteActionListener = null;
-    private RemoveNoteButtonActionListener removeNoteButtonActionListener = null;
     private ExitButtonButtonActionListener exitButtonButtonActionListener = null;
-    private StatisticsButtonButtonActionListener statisticsButtonButtonActionListener = null;
-    private SettingsButtonButtonActionListener settingsButtonButtonActionListener = null;
+    private StatisticsButtonActionListener statisticsButtonActionListener = null;
+    private SettingsButtonActionListener settingsButtonActionListener = null;
     private AboutButtonActionListener aboutButtonActionListener = null;
     private UsingRulesButtonActionListener usingRulesButtonActionListener = null;
     private PeriodTypeComboBoxItemListener periodTypeComboBoxItemListener = null;
@@ -68,22 +67,12 @@ public class Controller {
         return addNewNoteButtonActionListener;
     }
 
-    public EditNoteActionListener getEditNoteActionListener(JList<Note> notesList) {
-        if (notesList == null) {
-            System.out.println("null");
-
-        }
-        if (editNoteActionListener == null) {
-            editNoteActionListener = new EditNoteActionListener(this, notesList);
-        }
-        return editNoteActionListener;
+    public EditNoteActionListener getEditNoteActionListener(DataView dataView) {
+        return new EditNoteActionListener(this, dataView);
     }
 
-    public RemoveNoteButtonActionListener getRemoveNoteButtonActionListener(JList<Note> notesList) {
-        if (removeNoteButtonActionListener == null) {
-            removeNoteButtonActionListener = new RemoveNoteButtonActionListener(notesList);
-        }
-        return removeNoteButtonActionListener;
+    public RemoveNoteButtonActionListener getRemoveNoteButtonActionListener(DataView dataView) {
+        return new RemoveNoteButtonActionListener(dataView);
     }
 
     public ExitButtonButtonActionListener getExitButtonButtonActionListener() {
@@ -94,18 +83,22 @@ public class Controller {
         return exitButtonButtonActionListener;
     }
 
-    public StatisticsButtonButtonActionListener getStatisticsButtonButtonActionListener() {
-        if (statisticsButtonButtonActionListener == null) {
-            statisticsButtonButtonActionListener = new StatisticsButtonButtonActionListener(this);
-        }
-        return statisticsButtonButtonActionListener;
+    public DataViewButtonActionListener getDataViewButtonActionListener(Class dataViewClass, int id){
+        return new DataViewButtonActionListener(dataViewClass, id);
     }
 
-    public SettingsButtonButtonActionListener getSettingsButtonButtonActionListener() {
-        if (settingsButtonButtonActionListener == null) {
-            settingsButtonButtonActionListener = new SettingsButtonButtonActionListener();
+    public StatisticsButtonActionListener getStatisticsButtonActionListener() {
+        if (statisticsButtonActionListener == null) {
+            statisticsButtonActionListener = new StatisticsButtonActionListener(this);
         }
-        return settingsButtonButtonActionListener;
+        return statisticsButtonActionListener;
+    }
+
+    public SettingsButtonActionListener getSettingsButtonActionListener() {
+        if (settingsButtonActionListener == null) {
+            settingsButtonActionListener = new SettingsButtonActionListener();
+        }
+        return settingsButtonActionListener;
     }
 
     public AboutButtonActionListener getAboutButtonActionListener() {
@@ -168,6 +161,10 @@ public class Controller {
         return new NumericTextFieldFocusListener(type, defaultValue);
     }
 
+    public SelectAllTextMouseListener getSelectAllTextMouseListener(JTextField textField){
+        return new SelectAllTextMouseListener(textField);
+    }
+
     public NoteEditDialogComboBoxItemListener getNoteEditDialogComboBoxItemListener(JDialog dialog, String table) {
         return new NoteEditDialogComboBoxItemListener(dialog, table);
     }
@@ -184,16 +181,20 @@ public class Controller {
 
     }
 
-    public CloseDialogButtonActionListener getCloseDialogButtonActionListener(NoteEditDialog dialog, Note note) {
-        return new CloseDialogButtonActionListener(dialog, note);
+    public CloseNoteEditDialogButtonActionListener getCloseDialogButtonActionListener(NoteEditDialog dialog, Note note) {
+        return new CloseNoteEditDialogButtonActionListener(dialog, note);
     }
 
-    public StatisticsDialogPeriodComboBoxItemListener getStatisticsDialogPeriodComboBoxItemListener(StatisticsDialog dialog){
+    public StatisticsDialogPeriodComboBoxItemListener getStatisticsDialogPeriodComboBoxItemListener(StatisticsDialog dialog) {
         return new StatisticsDialogPeriodComboBoxItemListener(dialog);
     }
 
-    public StatisticsDialogItemTypeComboBoxItemListener getStatisticsDialogItemTypeComboBoxItemListener(StatisticsDialog dialog){
+    public StatisticsDialogItemTypeComboBoxItemListener getStatisticsDialogItemTypeComboBoxItemListener(StatisticsDialog dialog) {
         return new StatisticsDialogItemTypeComboBoxItemListener(dialog);
+    }
+
+    public CloseStatisticsDialogButtonActionListener getCloseStatisticsDialogButtonActionListener(StatisticsDialog dialog){
+        return new CloseStatisticsDialogButtonActionListener(dialog);
     }
 
     public int getSelectedPeriodType() {
@@ -248,6 +249,10 @@ public class Controller {
 
     }
 
+    public int getDataViewID() {
+        return model.getDataViewID();
+    }
+
     private class AddNewNoteButtonActionListener implements ActionListener {
         private Controller controller;
 
@@ -268,11 +273,11 @@ public class Controller {
 
     private class EditNoteActionListener implements ActionListener, MouseListener {
         private Controller controller;
-        private JList<Note> notesList;
+        private DataView dataView;
 
-        EditNoteActionListener(Controller controller, JList<Note> notesList) {
+        EditNoteActionListener(Controller controller, DataView dataView) {
             this.controller = controller;
-            this.notesList = notesList;
+            this.dataView = dataView;
         }
 
         @Override
@@ -281,7 +286,7 @@ public class Controller {
         }
 
         private void doEdit() {
-            Note note = notesList.getSelectedValue();
+            Note note = dataView.getSelectedValue();
             if (note == null) {
                 return;
             }
@@ -322,15 +327,15 @@ public class Controller {
     }
 
     private class RemoveNoteButtonActionListener implements ActionListener {
-        private JList<Note> notesList;
+        private DataView dataView;
 
-        RemoveNoteButtonActionListener(JList<Note> notesList) {
-            this.notesList = notesList;
+        RemoveNoteButtonActionListener(DataView dataView) {
+            this.dataView = dataView;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            Note note = notesList.getSelectedValue();
+            Note note = dataView.getSelectedValue();
             if (note == null) {
                 return;
             }
@@ -348,16 +353,33 @@ public class Controller {
         }
     }
 
-    private class SettingsButtonButtonActionListener implements ActionListener {
+    private class DataViewButtonActionListener implements ActionListener {
+        private Class dataViewClass;
+        private int id;
+
+        public DataViewButtonActionListener(Class dataViewClass, int id) {
+            this.dataViewClass = dataViewClass;
+            this.id = id;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            model.setDataViewID(id);
+            view.setDataView(dataViewClass);
+            view.update();
+        }
+    }
+
+    private class SettingsButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
         }
     }
 
-    private class StatisticsButtonButtonActionListener implements ActionListener {
+    private class StatisticsButtonActionListener implements ActionListener {
         private Controller controller;
 
-        StatisticsButtonButtonActionListener(Controller controller) {
+        StatisticsButtonActionListener(Controller controller) {
             this.controller = controller;
         }
 
@@ -533,6 +555,39 @@ public class Controller {
         }
     }
 
+    private class SelectAllTextMouseListener implements MouseListener{
+        private JTextField textField;
+
+        public SelectAllTextMouseListener(JTextField textField) {
+            this.textField = textField;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            textField.selectAll();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+    }
+
     private class NoteEditDialogComboBoxItemListener implements ItemListener {
         JDialog dialog;
         private String table;
@@ -625,11 +680,11 @@ public class Controller {
         }
     }
 
-    private class CloseDialogButtonActionListener implements ActionListener {
+    private class CloseNoteEditDialogButtonActionListener implements ActionListener {
         NoteEditDialog dialog;
         Note note;
 
-        CloseDialogButtonActionListener(NoteEditDialog dialog, Note note) {
+        CloseNoteEditDialogButtonActionListener(NoteEditDialog dialog, Note note) {
             this.dialog = dialog;
             this.note = note;
         }
@@ -683,6 +738,19 @@ public class Controller {
 
             dialog.setSelectedItemType(typeID);
             dialog.update();
+        }
+    }
+
+    private class CloseStatisticsDialogButtonActionListener implements ActionListener {
+        StatisticsDialog dialog;
+
+        CloseStatisticsDialogButtonActionListener(StatisticsDialog dialog) {
+            this.dialog = dialog;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            dialog.dispose();
         }
     }
 }
