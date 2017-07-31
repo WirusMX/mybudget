@@ -111,7 +111,7 @@ public class NoteEditDialog extends JDialog {
         setLayout(null);
         setModal(true);
         setLocationRelativeTo(null);
-        setUndecorated(true);
+        //setUndecorated(true);
 
         getRootPane().registerKeyboardAction(
                 controller.getCloseDialogButtonActionListener(this, note),
@@ -141,17 +141,36 @@ public class NoteEditDialog extends JDialog {
         itemTypeComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
         add(itemTypeComboBox);
 
-        JLabel label3 = new JLabel("Цена (руб.):");
+        JLabel label3 = new JLabel("Цена (руб./ед.):");
         label3.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label3);
 
         JTextField itemPriceTextField = new JTextField("" + note.getPriceAsString());
         itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
         itemPriceTextField.addMouseListener(controller.getSelectAllTextMouseListener(itemPriceTextField));
-
         itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
         add(itemPriceTextField);
 
+        JLabel countLabel = new JLabel("Количество:");
+        countLabel.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
+        add(countLabel);
+
+        JTextField itemsCountTextField = new JTextField("" + note.getPriceAsString());
+        itemsCountTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
+        itemsCountTextField.addMouseListener(controller.getSelectAllTextMouseListener(itemsCountTextField));
+        itemsCountTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        add(itemsCountTextField);
+
+        JLabel summLabel = new JLabel("Итого:");
+        summLabel.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
+        add(summLabel);
+
+        JTextField summTextField = new JTextField("" + note.getPriceAsString());
+        summTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
+        summTextField.addMouseListener(controller.getSelectAllTextMouseListener(summTextField));
+        summTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        add(summTextField);
+        
         JLabel label4 = new JLabel("Магазин: ");
         label4.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label4);
@@ -215,17 +234,18 @@ public class NoteEditDialog extends JDialog {
         add(yearTextField);
 
         JButton saveButton = new JButton("Сохранить");
-        saveButton.addActionListener(controller.getSaveNoteButtonActionListener(this, note, itemNameTextField, itemTypeComboBox, itemPriceTextField,
+        saveButton.addActionListener(controller.getSaveNoteButtonActionListener(this, note, itemNameTextField, itemTypeComboBox, summTextField,
                 shopComboBox, necessityLevelComboBox, qualityLevelComboBox, saleCheckBox, dayTextField, monthTextField,
                 yearTextField));
-        saveButton.setBounds(50, Y0 + DELTA_Y * elementsLine + 50, 200, 30);
+        saveButton.setBounds(30, Y0 + DELTA_Y * elementsLine + 50, 200, 30);
         add(saveButton);
 
         JButton closeButton = new JButton("Закрыть");
         closeButton.addActionListener(controller.getCloseDialogButtonActionListener(this, note));
-        closeButton.setBounds(280, Y0 + DELTA_Y * elementsLine + 50, 200, 30);
+        closeButton.setBounds(260, Y0 + DELTA_Y * elementsLine++ + 50, 200, 30);
         add(closeButton);
 
+        setSize(500, Y0 + DELTA_Y * elementsLine + 100);
         setVisible(true);
     }
 

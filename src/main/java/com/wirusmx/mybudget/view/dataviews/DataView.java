@@ -4,7 +4,6 @@ import com.wirusmx.mybudget.model.Note;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseListener;
 import java.util.List;
 
 /**
@@ -23,12 +22,6 @@ public abstract class DataView extends JPanel {
         setViewValues();
     }
 
-    public void clear() {
-        this.notes.clear();
-        clearView();
-    }
-
-    public abstract void addMouseListener(MouseListener mouseListener);
 
     public abstract void setComponentPopupMenu(JPopupMenu popupMenu);
 
