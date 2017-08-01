@@ -1,7 +1,6 @@
 package com.wirusmx.mybudget.view.dialogs;
 
 import com.wirusmx.mybudget.controller.Controller;
-import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 
@@ -111,7 +110,7 @@ public class NoteEditDialog extends JDialog {
         setLayout(null);
         setModal(true);
         setLocationRelativeTo(null);
-        //setUndecorated(true);
+        setIconImage(controller.getImage("edit").getImage());
 
         getRootPane().registerKeyboardAction(
                 controller.getCloseDialogButtonActionListener(this, note),
@@ -128,6 +127,7 @@ public class NoteEditDialog extends JDialog {
 
         JTextField itemNameTextField = new JTextField(note.getItem());
         itemNameTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        itemNameTextField.setToolTipText("Укажите наименование товара. Например: Мыло.");
         add(itemNameTextField);
 
         JLabel label2 = new JLabel("Тип: ");
@@ -135,51 +135,64 @@ public class NoteEditDialog extends JDialog {
         add(label2);
 
         JComboBox<SimpleData> itemTypeComboBox = new JComboBox<>();
-        addValuesToComboBox(itemTypeComboBox, "item_types");
+        addValuesToComboBox(itemTypeComboBox, "item_types", true);
         selectValue(itemTypeComboBox, note.getType());
         itemTypeComboBox.addItemListener(controller.getNoteEditDialogComboBoxItemListener(this, "item_types"));
         itemTypeComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        itemTypeComboBox.setToolTipText("Выберите тип товара из списка или добавьте новый тип.");
         add(itemTypeComboBox);
 
-        JLabel label3 = new JLabel("Цена (руб./ед.):");
+        JLabel label3 = new JLabel("Цена (руб./шт.):");
         label3.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label3);
 
         JTextField itemPriceTextField = new JTextField("" + note.getPriceAsString());
-        itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
+        itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f), 2));
         itemPriceTextField.addMouseListener(controller.getSelectAllTextMouseListener(itemPriceTextField));
         itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        itemPriceTextField.setToolTipText("Укажите цену за одну единицу (шт., кг., и т.п.) товара.");
         add(itemPriceTextField);
 
         JLabel countLabel = new JLabel("Количество:");
         countLabel.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(countLabel);
 
-        JTextField itemsCountTextField = new JTextField("" + note.getPriceAsString());
-        itemsCountTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
+        JTextField itemsCountTextField = new JTextField("" + note.getCountAsString());
+        itemsCountTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.COUNT_FORMAT, 0f), 3));
         itemsCountTextField.addMouseListener(controller.getSelectAllTextMouseListener(itemsCountTextField));
-        itemsCountTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        itemsCountTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine, secondColElementWidth - 70, ELEMENT_HEIGHT);
+        itemsCountTextField.setToolTipText("Укажите количество купленного товара.");
         add(itemsCountTextField);
 
-        JLabel summLabel = new JLabel("Итого:");
-        summLabel.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
-        add(summLabel);
+        JComboBox<SimpleData> countTypeComboBox = new JComboBox<>();
+        addValuesToComboBox(countTypeComboBox, "count_types", false);
+        selectValue(countTypeComboBox, note.getCountType());
+        countTypeComboBox.addItemListener(controller.getCountTypeComboBoxItemListener(label3));
+        countTypeComboBox.setBounds(SECOND_COL_X_POS + secondColElementWidth - 60, Y0 + DELTA_Y * elementsLine++, 60, ELEMENT_HEIGHT);
+        countTypeComboBox.setToolTipText("Укажите единицы измерения количества товара.");
+        add(countTypeComboBox);
 
-        JTextField summTextField = new JTextField("" + note.getPriceAsString());
-        summTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f)));
-        summTextField.addMouseListener(controller.getSelectAllTextMouseListener(summTextField));
-        summTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
-        add(summTextField);
-        
+        JLabel totalLabel = new JLabel("Итого:");
+        totalLabel.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
+        add(totalLabel);
+
+        JTextField totalTextField = new JTextField("" + note.getTotalAsString());
+        totalTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f), 2));
+        totalTextField.addMouseListener(controller.getSelectAllTextMouseListener(totalTextField));
+        totalTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        totalTextField.setToolTipText("Значение будет вычислено автоматически, если заполены предыдущие поля (цена и количество).");
+        add(totalTextField);
+
         JLabel label4 = new JLabel("Магазин: ");
         label4.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label4);
 
         JComboBox<SimpleData> shopComboBox = new JComboBox<>();
-        addValuesToComboBox(shopComboBox, "shops");
+        addValuesToComboBox(shopComboBox, "shops", true);
         selectValue(shopComboBox, note.getShop());
         shopComboBox.addItemListener(controller.getNoteEditDialogComboBoxItemListener(this, "shops"));
         shopComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        shopComboBox.setToolTipText("Выберите магазин, где был преобретен товар, из списка или добавьте новый.");
         add(shopComboBox);
 
         JLabel label5 = new JLabel("Необходимость: ");
@@ -187,10 +200,11 @@ public class NoteEditDialog extends JDialog {
         add(label5);
 
         JComboBox<SimpleData> necessityLevelComboBox = new JComboBox<>();
-        necessityLevelComboBox.addItem(new SimpleData(Model.Necessity.HIGH, "Высокая"));
-        necessityLevelComboBox.addItem(new SimpleData(Model.Necessity.LOW, "Низкая"));
+        necessityLevelComboBox.addItem(new SimpleData(Note.Necessity.HIGH, "Высокая"));
+        necessityLevelComboBox.addItem(new SimpleData(Note.Necessity.LOW, "Низкая"));
         necessityLevelComboBox.setSelectedIndex(note.getNecessity().getId() % 2);
         necessityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        necessityLevelComboBox.setToolTipText("Выберите уровень необходимости в преобретении данного товара.");
         add(necessityLevelComboBox);
 
         JLabel label6 = new JLabel("Качество: ");
@@ -198,45 +212,67 @@ public class NoteEditDialog extends JDialog {
         add(label6);
 
         JComboBox<SimpleData> qualityLevelComboBox = new JComboBox<>();
-        qualityLevelComboBox.addItem(new SimpleData(Model.Quality.UNDEFINED, "-"));
-        qualityLevelComboBox.addItem(new SimpleData(Model.Quality.HIGH, "Высокое"));
-        qualityLevelComboBox.addItem(new SimpleData(Model.Quality.MEDIUM, "Среднее"));
-        qualityLevelComboBox.addItem(new SimpleData(Model.Quality.LOW, "Низкое"));
+        qualityLevelComboBox.addItem(new SimpleData(Note.Quality.UNDEFINED, "-"));
+        qualityLevelComboBox.addItem(new SimpleData(Note.Quality.HIGH, "Высокое"));
+        qualityLevelComboBox.addItem(new SimpleData(Note.Quality.MEDIUM, "Среднее"));
+        qualityLevelComboBox.addItem(new SimpleData(Note.Quality.LOW, "Низкое"));
         qualityLevelComboBox.setSelectedIndex(note.getQuality().getId() % 4);
         qualityLevelComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        qualityLevelComboBox.setToolTipText("Оцените товар.");
         add(qualityLevelComboBox);
 
         JCheckBox saleCheckBox = new JCheckBox("Со скидкой ");
         saleCheckBox.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine++, LABEL_WIDTH, ELEMENT_HEIGHT);
         saleCheckBox.setSelected(note.isBySale());
+        saleCheckBox.setToolTipText("Поставьте галочку, если товар преобретен со скидкой.");
         add(saleCheckBox);
 
         JLabel label7 = new JLabel("Дата: ");
         label7.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
+        label7.setToolTipText("Укажите дату перобретения товара.");
         add(label7);
 
         JTextField dayTextField = new JTextField(note.getDay());
-        dayTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getDay()));
+        dayTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getDay(), 0));
         dayTextField.addMouseListener(controller.getSelectAllTextMouseListener(dayTextField));
         dayTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine, 30, ELEMENT_HEIGHT);
+        dayTextField.setToolTipText("День");
         add(dayTextField);
 
         JTextField monthTextField = new JTextField(note.getMonth());
-        monthTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getMonth()));
+        monthTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getMonth(), 0));
         monthTextField.addMouseListener(controller.getSelectAllTextMouseListener(monthTextField));
         monthTextField.setBounds(SECOND_COL_X_POS + 35, Y0 + DELTA_Y * elementsLine, 30, ELEMENT_HEIGHT);
+        monthTextField.setToolTipText("Месяц");
         add(monthTextField);
 
         JTextField yearTextField = new JTextField(note.getYear());
-        yearTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getYear()));
+        yearTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getYear(), 0));
         yearTextField.addMouseListener(controller.getSelectAllTextMouseListener(yearTextField));
         yearTextField.setBounds(SECOND_COL_X_POS + 70, Y0 + DELTA_Y * elementsLine, 60, ELEMENT_HEIGHT);
+        yearTextField.setToolTipText("Год");
         add(yearTextField);
 
         JButton saveButton = new JButton("Сохранить");
-        saveButton.addActionListener(controller.getSaveNoteButtonActionListener(this, note, itemNameTextField, itemTypeComboBox, summTextField,
-                shopComboBox, necessityLevelComboBox, qualityLevelComboBox, saleCheckBox, dayTextField, monthTextField,
-                yearTextField));
+        saveButton.addActionListener(
+                controller.getSaveNoteButtonActionListener(
+                        this,
+                        note,
+                        itemNameTextField,
+                        itemTypeComboBox,
+                        itemPriceTextField,
+                        itemsCountTextField,
+                        countTypeComboBox,
+                        totalTextField,
+                        shopComboBox,
+                        necessityLevelComboBox,
+                        qualityLevelComboBox,
+                        saleCheckBox,
+                        dayTextField,
+                        monthTextField,
+                        yearTextField
+                )
+        );
         saveButton.setBounds(30, Y0 + DELTA_Y * elementsLine + 50, 200, 30);
         add(saveButton);
 
@@ -262,14 +298,16 @@ public class NoteEditDialog extends JDialog {
         }
     }
 
-    private void addValuesToComboBox(JComboBox<SimpleData> comboBox, String tableName) {
+    private void addValuesToComboBox(JComboBox<SimpleData> comboBox, String tableName, boolean addDefaulValue) {
         comboBox.removeAllItems();
         Set<SimpleData> values = controller.getComboBoxValues(tableName);
         for (SimpleData d : values) {
             comboBox.addItem(d);
         }
 
-        comboBox.addItem(new SimpleData(-1, "Добавить новый"));
+        if (addDefaulValue) {
+            comboBox.addItem(new SimpleData(-1, "Добавить новый"));
+        }
     }
 
 }

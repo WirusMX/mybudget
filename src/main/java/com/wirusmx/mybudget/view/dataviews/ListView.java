@@ -1,6 +1,5 @@
 package com.wirusmx.mybudget.view.dataviews;
 
-import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 
 import javax.swing.*;
@@ -24,13 +23,13 @@ public class ListView extends DataView {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Note) {
-                    if (((Note) value).getNecessity().getId() == Model.Necessity.LOW  && ((Note) value).isBySale()) {
+                    if (((Note) value).getNecessity().getId() == Note.Necessity.LOW  && ((Note) value).isBySale()) {
                         setBackground(Color.ORANGE);
                     } else {
                         if (((Note) value).isBySale()) {
                             setBackground(Color.GREEN);
                         } else {
-                            if (((Note) value).getNecessity().getId() == 1) {
+                            if (((Note) value).getNecessity().getId() == Note.Necessity.LOW) {
                                 setBackground(Color.PINK);
                             }
                         }

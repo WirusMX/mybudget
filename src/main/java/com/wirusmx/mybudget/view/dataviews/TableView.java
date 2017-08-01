@@ -1,6 +1,5 @@
 package com.wirusmx.mybudget.view.dataviews;
 
-import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 
 import javax.swing.*;
@@ -18,7 +17,8 @@ public class TableView extends DataView {
     private final String[] tableHeader = new String[]{
             "Товар",
             "Магазин",
-            "Цена",
+            "Количество",
+            "Стоимость",
             "Дата",
             "Качество"
     };
@@ -37,7 +37,7 @@ public class TableView extends DataView {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         table.setFont(new Font("Monospaced", Font.PLAIN, 13));
         tableModel.setColumnIdentifiers(tableHeader);
-        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer(){
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -45,13 +45,13 @@ public class TableView extends DataView {
 
                 Color color = Color.WHITE;
 
-                if (note.getNecessity().getId() == Model.Necessity.LOW && note.isBySale()) {
+                if (note.getNecessity().getId() == Note.Necessity.LOW && note.isBySale()) {
                     color = Color.ORANGE;
                 } else {
                     if (note.isBySale()) {
                         color = Color.GREEN;
                     } else {
-                        if (note.getNecessity().getId() == Model.Necessity.LOW) {
+                        if (note.getNecessity().getId() == Note.Necessity.LOW) {
                             color = Color.PINK;
                         }
                     }
@@ -63,7 +63,7 @@ public class TableView extends DataView {
 
         };
 
-        for (int i = 0; i < table.getColumnCount(); i++){
+        for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
         }
         add(new JScrollPane(table), BorderLayout.CENTER);
@@ -95,11 +95,26 @@ public class TableView extends DataView {
     @Override
     void setViewValues() {
         for (Note n : notes) {
+            String total = n.getTotalAsString() + " руб.";
+            if (n.getCount() != 1f || n.isBySale()){
+                total += "(";
+
+                if (n.getCount() != 1f){
+                    total += n.getPriceAsString() + " руб./" + n.getCountType() + " ";
+                }
+
+                if (n.isBySale()){
+                    total += "со скидкой";
+                }
+
+                total += ")";
+            }
             tableModel.addRow(
                     new String[]{
                             n.getItem(),
                             n.getShop().toString(),
-                            n.getPriceAsString() + (n.isBySale() ? " (со скидкой)" : ""),
+                            n.getCountAsString() + " " + n.getCountType(),
+                            total,
                             n.getDate(),
                             n.getQualityInStars()
                     }

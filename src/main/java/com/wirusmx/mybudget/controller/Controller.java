@@ -83,7 +83,7 @@ public class Controller {
         return exitButtonButtonActionListener;
     }
 
-    public DataViewButtonActionListener getDataViewButtonActionListener(Class dataViewClass, int id){
+    public DataViewButtonActionListener getDataViewButtonActionListener(Class dataViewClass, int id) {
         return new DataViewButtonActionListener(dataViewClass, id);
     }
 
@@ -157,26 +157,54 @@ public class Controller {
         return resetButtonActionListener;
     }
 
-    public NumericTextFieldFocusListener getNumericTextFieldFocusListener(Class type, String defaultValue) {
-        return new NumericTextFieldFocusListener(type, defaultValue);
+    public NumericTextFieldFocusListener getNumericTextFieldFocusListener(Class type, String defaultValue, int cutNum) {
+        return new NumericTextFieldFocusListener(type, defaultValue, cutNum);
     }
 
-    public SelectAllTextMouseListener getSelectAllTextMouseListener(JTextField textField){
+    public SelectAllTextMouseListener getSelectAllTextMouseListener(JTextField textField) {
         return new SelectAllTextMouseListener(textField);
+    }
+
+    public CountTypeComboBoxItemListener getCountTypeComboBoxItemListener(JLabel label){
+        return new CountTypeComboBoxItemListener(label);
     }
 
     public NoteEditDialogComboBoxItemListener getNoteEditDialogComboBoxItemListener(JDialog dialog, String table) {
         return new NoteEditDialogComboBoxItemListener(dialog, table);
     }
 
-    public SaveNoteButtonActionListener getSaveNoteButtonActionListener(NoteEditDialog dialog, Note note, JTextField itemNameTextField,
-                                                                        JComboBox itemTypeComboBox, JTextField itemPriceTextField,
-                                                                        JComboBox shopComboBox, JComboBox necessityLevelComboBox,
-                                                                        JComboBox qualityLevelComboBox, JCheckBox saleCheckBox,
-                                                                        JTextField dayTextField, JTextField monthTextField,
-                                                                        JTextField yearTextField) {
-        return new SaveNoteButtonActionListener(dialog, note, itemNameTextField, itemTypeComboBox, itemPriceTextField,
-                shopComboBox, necessityLevelComboBox, qualityLevelComboBox, saleCheckBox, dayTextField, monthTextField,
+    public SaveNoteButtonActionListener getSaveNoteButtonActionListener(
+            NoteEditDialog dialog,
+            Note note,
+            JTextField itemNameTextField,
+            JComboBox itemTypeComboBox,
+            JTextField itemPriceTextField,
+            JTextField itemCountTextField,
+            JComboBox countTypeComboBox,
+            JTextField totalTextField,
+            JComboBox shopComboBox,
+            JComboBox necessityLevelComboBox,
+            JComboBox qualityLevelComboBox,
+            JCheckBox saleCheckBox,
+            JTextField dayTextField,
+            JTextField monthTextField,
+            JTextField yearTextField
+    ) {
+        return new SaveNoteButtonActionListener(
+                dialog,
+                note,
+                itemNameTextField,
+                itemTypeComboBox,
+                itemPriceTextField,
+                itemCountTextField,
+                countTypeComboBox,
+                totalTextField,
+                shopComboBox,
+                necessityLevelComboBox,
+                qualityLevelComboBox,
+                saleCheckBox,
+                dayTextField,
+                monthTextField,
                 yearTextField);
 
     }
@@ -193,7 +221,7 @@ public class Controller {
         return new StatisticsDialogItemTypeComboBoxItemListener(dialog);
     }
 
-    public CloseStatisticsDialogButtonActionListener getCloseStatisticsDialogButtonActionListener(StatisticsDialog dialog){
+    public CloseStatisticsDialogButtonActionListener getCloseStatisticsDialogButtonActionListener(StatisticsDialog dialog) {
         return new CloseStatisticsDialogButtonActionListener(dialog);
     }
 
@@ -234,8 +262,8 @@ public class Controller {
 
             for (Note n : notes) {
                 if (itemType == -1 || n.getType().getId() == itemType) {
-                    result[2][Integer.parseInt(n.getMonth()) - 1] += n.getPrice();
-                    result[n.getNecessity().getId()][Integer.parseInt(n.getMonth()) - 1] += n.getPrice();
+                    result[2][Integer.parseInt(n.getMonth()) - 1] += n.getTotal();
+                    result[n.getNecessity().getId()][Integer.parseInt(n.getMonth()) - 1] += n.getTotal();
                 }
             }
         } else {
@@ -524,10 +552,12 @@ public class Controller {
     private class NumericTextFieldFocusListener implements FocusListener {
         private String defaultValue;
         private Class type;
+        int cutNum;
 
-        NumericTextFieldFocusListener(Class type, String defaultValue) {
+        NumericTextFieldFocusListener(Class type, String defaultValue, int cutNum) {
             this.defaultValue = defaultValue;
             this.type = type;
+            this.cutNum = cutNum;
         }
 
         @Override
@@ -545,7 +575,7 @@ public class Controller {
 
             String text = textField.getText();
 
-            text = model.stringToNumericFormat(type, text);
+            text = model.stringToNumericFormat(type, text, cutNum);
 
             if (text.length() == 0) {
                 text = defaultValue;
@@ -555,7 +585,7 @@ public class Controller {
         }
     }
 
-    private class SelectAllTextMouseListener implements MouseListener{
+    private class SelectAllTextMouseListener implements MouseListener {
         private JTextField textField;
 
         public SelectAllTextMouseListener(JTextField textField) {
@@ -585,6 +615,20 @@ public class Controller {
         @Override
         public void mouseExited(MouseEvent e) {
 
+        }
+    }
+
+    private class CountTypeComboBoxItemListener implements ItemListener {
+        private JLabel label;
+        private String prefix = "Цена (руб./";
+
+        public CountTypeComboBoxItemListener(JLabel label) {
+            this.label = label;
+        }
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            label.setText(prefix + ((SimpleData)e.getItem()).toString() + "):");
         }
     }
 
@@ -629,30 +673,45 @@ public class Controller {
     }
 
     private class SaveNoteButtonActionListener implements ActionListener {
-        NoteEditDialog dialog;
-        Note note;
-        JTextField itemNameTextField;
-        JComboBox itemTypeComboBox;
-        JTextField itemPriceTextField;
-        JComboBox shopComboBox;
-        JComboBox necessityLevelComboBox;
-        JComboBox qualityLevelComboBox;
-        JCheckBox saleCheckBox;
-        JTextField dayTextField;
-        JTextField monthTextField;
-        JTextField yearTextField;
+        private NoteEditDialog dialog;
+        private Note note;
+        private JTextField itemNameTextField;
+        private JComboBox itemTypeComboBox;
+        private JTextField itemPriceTextField;
+        private JTextField itemCountTextField;
+        private JComboBox countTypeComboBox;
+        private JTextField totalTextField;
+        private JComboBox shopComboBox;
+        private JComboBox necessityLevelComboBox;
+        private JComboBox qualityLevelComboBox;
+        private JCheckBox saleCheckBox;
+        private JTextField dayTextField;
+        private JTextField monthTextField;
+        private JTextField yearTextField;
 
-        SaveNoteButtonActionListener(NoteEditDialog dialog, Note note, JTextField itemNameTextField,
-                                     JComboBox itemTypeComboBox, JTextField itemPriceTextField,
-                                     JComboBox shopComboBox, JComboBox necessityLevelComboBox,
-                                     JComboBox qualityLevelComboBox, JCheckBox saleCheckBox,
-                                     JTextField dayTextField, JTextField monthTextField,
+        SaveNoteButtonActionListener(NoteEditDialog dialog,
+                                     Note note,
+                                     JTextField itemNameTextField,
+                                     JComboBox itemTypeComboBox,
+                                     JTextField itemPriceTextField,
+                                     JTextField itemCountTextField,
+                                     JComboBox countTypeComboBox,
+                                     JTextField totalTextField,
+                                     JComboBox shopComboBox,
+                                     JComboBox necessityLevelComboBox,
+                                     JComboBox qualityLevelComboBox,
+                                     JCheckBox saleCheckBox,
+                                     JTextField dayTextField,
+                                     JTextField monthTextField,
                                      JTextField yearTextField) {
             this.dialog = dialog;
             this.note = note;
             this.itemNameTextField = itemNameTextField;
             this.itemTypeComboBox = itemTypeComboBox;
             this.itemPriceTextField = itemPriceTextField;
+            this.itemCountTextField = itemCountTextField;
+            this.countTypeComboBox = countTypeComboBox;
+            this.totalTextField = totalTextField;
             this.shopComboBox = shopComboBox;
             this.necessityLevelComboBox = necessityLevelComboBox;
             this.qualityLevelComboBox = qualityLevelComboBox;
@@ -669,10 +728,23 @@ public class Controller {
                 return;
             }
 
-            note.update(itemNameTextField.getText(), (SimpleData) itemTypeComboBox.getSelectedItem(),
-                    Float.parseFloat(itemPriceTextField.getText()), (SimpleData) shopComboBox.getSelectedItem(),
-                    (SimpleData) necessityLevelComboBox.getSelectedItem(), (SimpleData) qualityLevelComboBox.getSelectedItem(),
-                    saleCheckBox.isSelected(), dayTextField.getText(), monthTextField.getText(), yearTextField.getText());
+            if (Float.parseFloat(itemCountTextField.getText()) == 0f) {
+                JOptionPane.showMessageDialog(dialog, "Укажите количество товара!", "", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            note.update(itemNameTextField.getText(),
+                    (SimpleData) itemTypeComboBox.getSelectedItem(),
+                    Float.parseFloat(itemPriceTextField.getText()),
+                    Float.parseFloat(itemCountTextField.getText()),
+                    (SimpleData) countTypeComboBox.getSelectedItem(),
+                    (SimpleData) shopComboBox.getSelectedItem(),
+                    (SimpleData) necessityLevelComboBox.getSelectedItem(),
+                    (SimpleData) qualityLevelComboBox.getSelectedItem(),
+                    saleCheckBox.isSelected(),
+                    dayTextField.getText(),
+                    monthTextField.getText(),
+                    yearTextField.getText());
 
             dialog.setDialogResult(JOptionPane.YES_OPTION);
 

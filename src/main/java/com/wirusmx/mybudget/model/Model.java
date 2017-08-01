@@ -95,8 +95,9 @@ public class Model {
     }
 
     public void init() {
+
         template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                "itemTitle TEXT, typeID INTEGER, price REAL, shopID INTEGER, " +
+                "itemTitle TEXT, typeID INTEGER, price REAL, count REAL, countTypeID INTEGER, shopID INTEGER, " +
                 "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
                 "month TEXT, year TEXT);");
 
@@ -104,12 +105,18 @@ public class Model {
                 "title TEXT);");
         template.execute("INSERT OR REPLACE INTO item_types (id, title) VALUES (0, 'Прочее')");
 
+        template.execute("CREATE TABLE IF NOT EXISTS count_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "title TEXT);");
+        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (0, 'шт.')");
+        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (1, 'кг.')");
+        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (2, 'л.')");
+
         template.execute("CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "title TEXT);");
         template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее')");
 
-        template.execute("CREATE TABLE IF NOT EXISTS application (version TEXT)");
-        template.execute("INSERT OR REPLACE INTO application (version) VALUES ('" + applicationVersion + "')");
+        template.execute("CREATE TABLE IF NOT EXISTS application (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT)");
+        template.execute("INSERT OR REPLACE INTO application (id, version) VALUES (0, '" + applicationVersion + "')");
 
         userSettings = new Properties();
         if (new java.io.File(USER_SETTINGS_PROPERTIES_PATH).exists()) {
@@ -164,12 +171,14 @@ public class Model {
     }
 
     public void insertNote(Note note) {
-        template.execute("INSERT INTO product (itemTitle, typeID, price, shopID, " +
+        template.execute("INSERT INTO product (itemTitle, typeID, price, count, countTypeID, shopID, " +
                 "necessityID, qualityID, bySale, day, month, year) " +
                 "VALUES ("
                 + "'" + note.getItem() + "', "
                 + note.getType().getId() + ", "
                 + note.getPrice() + ", "
+                + note.getCount() + ", "
+                + note.getCountType().getId() + ", "
                 + note.getShop().getId() + ", "
                 + note.getNecessity().getId() + ", "
                 + note.getQuality().getId() + ", "
@@ -188,13 +197,15 @@ public class Model {
     }
 
     public void updateNote(Note note) {
-        template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, shopID, " +
+        template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, count, countTypeID, shopID, " +
                 "necessityID, qualityID, bySale, day, month, year) " +
                 "VALUES ("
                 + note.getId() + ", "
                 + "'" + note.getItem() + "', "
                 + note.getType().getId() + ", "
                 + note.getPrice() + ", "
+                + note.getCount() + ", "
+                + note.getCountType().getId() + ", "
                 + note.getShop().getId() + ", "
                 + note.getNecessity().getId() + ", "
                 + note.getQuality().getId() + ", "
@@ -253,9 +264,9 @@ public class Model {
         return getPeriods(selectedPeriodType);
     }
 
-    public String stringToNumericFormat(Class type, String value) {
+    public String stringToNumericFormat(Class type, String value, int cutNum) {
         if (type.equals(Float.class)) {
-            return stringToFloatFormat(value);
+            return stringToFloatFormat(value, cutNum);
         }
 
         if (type.equals(Integer.class)) {
@@ -265,7 +276,7 @@ public class Model {
         return "";
     }
 
-    private String stringToFloatFormat(String text) {
+    private String stringToFloatFormat(String text, int cutNum) {
         if (!text.matches("\\d+")) {
             text = text.replaceAll(",", ".");
             text = text.replaceAll("[^0-9.]", "");
@@ -274,8 +285,8 @@ public class Model {
             }
 
             int pos = text.indexOf('.');
-            if (pos >= 0 && text.length() - pos > 3) {
-                text = text.substring(0, pos + 3);
+            if (pos >= 0 && text.length() - pos > cutNum + 1) {
+                text = text.substring(0, pos + cutNum + 1);
             }
 
             if (pos == text.length() - 1 && text.length() - 1 > 0){
@@ -324,15 +335,18 @@ public class Model {
         }
 
         try {
-            result = template.query("SELECT * FROM (product INNER JOIN shops ON product.shopID = shops.id) " +
-                    "INNER JOIN item_types ON product.typeID=item_types.id " + period + ";", new RowMapper<Note>() {
+            result = template.query("SELECT * FROM ((product INNER JOIN shops ON product.shopID = shops.id) " +
+                    "INNER JOIN item_types ON product.typeID=item_types.id) " +
+                    "INNER JOIN count_types ON product.countTypeID=count_types.id " + period + ";", new RowMapper<Note>() {
                 @Override
                 public Note mapRow(ResultSet resultSet, int i) throws SQLException {
                     return new Note(resultSet.getInt("id"),
                             resultSet.getString("itemTitle"),
-                            new SimpleData(resultSet.getInt("typeID"), resultSet.getString(15)),
+                            new SimpleData(resultSet.getInt("typeID"), resultSet.getString(17)),
                             resultSet.getFloat("price"),
-                            new SimpleData(resultSet.getInt("shopID"), resultSet.getString(13)),
+                            resultSet.getFloat("count"),
+                            new SimpleData(resultSet.getInt("countTypeID"), resultSet.getString(19)),
+                            new SimpleData(resultSet.getInt("shopID"), resultSet.getString(15)),
                             new SimpleData(resultSet.getInt("necessityID"), ""),
                             new SimpleData(resultSet.getInt("qualityID"), ""),
                             resultSet.getInt("bySale") == 1,
@@ -466,16 +480,5 @@ public class Model {
         public static final int BY_SALE = 5;
     }
 
-    public static class Quality {
-        public static final int UNDEFINED = 0;
-        public static final int HIGH = 1;
-        public static final int MEDIUM = 2;
-        public static final int LOW = 3;
-    }
-
-    public static class Necessity {
-        public static final int HIGH = 0;
-        public static final int LOW = 1;
-    }
 }
 

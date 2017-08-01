@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class DataView extends JPanel {
     List<Note> notes;
 
-    public DataView() {
+    DataView() {
         setLayout(new BorderLayout());
     }
 

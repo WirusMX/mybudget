@@ -6,11 +6,14 @@ import java.util.Locale;
 
 public class Note {
     public static final String PRICE_FORMAT = "%.2f";
+    public static final String COUNT_FORMAT = "%.3f";
 
     private final int id;
     private String item;
     private SimpleData type;
     private float price;
+    private float count;
+    private SimpleData countType;
     private SimpleData shop;
     private SimpleData necessity;
     private SimpleData quality;
@@ -24,10 +27,12 @@ public class Note {
                 -1,
                 "",
                 new SimpleData(-2, ""),
-                0,
+                0f,
+                0f,
+                new SimpleData(0, ""),
                 new SimpleData(-2, ""),
-                new SimpleData(0, ""),
-                new SimpleData(0, ""),
+                new SimpleData(Necessity.HIGH, ""),
+                new SimpleData(Quality.UNDEFINED, ""),
                 false,
                 "" + new GregorianCalendar().get(Calendar.DAY_OF_MONTH),
                 "" + (new GregorianCalendar().get(Calendar.MONTH) + 1),
@@ -36,13 +41,15 @@ public class Note {
 
     }
 
-    Note(int id, String item, SimpleData type, float price,
+    Note(int id, String item, SimpleData type, float price, float count, SimpleData countType,
          SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
          String day, String month, String year) {
         this.id = id;
         this.item = item;
         this.type = type;
         this.price = price;
+        this.count = count;
+        this.countType = countType;
         this.shop = shop;
         this.necessity = necessity;
         this.quality = quality;
@@ -72,6 +79,29 @@ public class Note {
         return String.format(Locale.ENGLISH, PRICE_FORMAT, price);
     }
 
+    public float getCount() {
+        return count;
+    }
+
+    public String getCountAsString() {
+        return String.format(Locale.ENGLISH, COUNT_FORMAT, count);
+    }
+
+    public SimpleData getCountType(){
+        return countType;
+    }
+
+    /**
+     * @return total value, which equals <code>Note.price * Note.count</code>.
+     */
+    public float getTotal() {
+        return price * count;
+    }
+
+    public String getTotalAsString() {
+        return String.format(Locale.ENGLISH, PRICE_FORMAT, getTotal());
+    }
+
     public SimpleData getShop() {
         return shop;
     }
@@ -87,7 +117,7 @@ public class Note {
     public String getQualityInStars() {
         String result = "";
 
-        if (quality.getId() != Model.Quality.UNDEFINED) {
+        if (quality.getId() != Quality.UNDEFINED) {
             for (int i = 0; i < 4 - quality.getId(); i++) {
                 result += "★";
             }
@@ -116,12 +146,14 @@ public class Note {
         return day + "." + month + "." + year;
     }
 
-    public void update(String item, SimpleData type, float price,
+    public void update(String item, SimpleData type, float price, float count, SimpleData countType,
                        SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
                        String day, String month, String year) {
         this.item = item;
         this.type = type;
         this.price = price;
+        this.count = count;
+        this.countType = countType;
         this.shop = shop;
         this.necessity = necessity;
         this.quality = quality;
@@ -133,10 +165,22 @@ public class Note {
 
     @Override
     public String toString() {
-        String result = item + " (" + shop.getTitle() + "; " + getPriceAsString() + " руб.";
-        if (bySale) {
-            result += " (со скидкой)";
+        String total = getTotalAsString() + " руб.";
+        if (getCount() != 1f || isBySale()){
+            total += "(";
+
+            if (getCount() != 1f){
+                total += getPriceAsString() + " руб./" + getCountType() + " ";
+            }
+
+            if (isBySale()){
+                total += "со скидкой";
+            }
+
+            total += ")";
         }
+
+        String result = item + " (" + shop.getTitle() + "; " + total;
 
         result += "; " + getDate() + ")";
 
@@ -145,5 +189,15 @@ public class Note {
         return result;
     }
 
+    public static class Quality {
+        public static final int UNDEFINED = 0;
+        public static final int HIGH = 1;
+        public static final int MEDIUM = 2;
+        public static final int LOW = 3;
+    }
 
+    public static class Necessity {
+        public static final int HIGH = 0;
+        public static final int LOW = 1;
+    }
 }
