@@ -1,5 +1,6 @@
 package com.wirusmx.mybudget.controller;
 
+import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
@@ -157,21 +158,30 @@ public class Controller {
         return resetButtonActionListener;
     }
 
+    public ItemsTitleTextFieldKeyListener getItemsTitleTextFieldKeyListener(JComboBox<String> itemsComboBox) {
+        return new ItemsTitleTextFieldKeyListener(itemsComboBox);
+    }
+
     public NumericTextFieldFocusListener getNumericTextFieldFocusListener(Class type, String defaultValue, int cutNum) {
         return new NumericTextFieldFocusListener(type, defaultValue, cutNum);
+    }
+
+    public TotalCalcTextFieldFocusListener getTotalCalcTextFieldFocusListener(JTextField priceTextField, JTextField countTextField) {
+        return new TotalCalcTextFieldFocusListener(priceTextField, countTextField);
     }
 
     public SelectAllTextMouseListener getSelectAllTextMouseListener(JTextField textField) {
         return new SelectAllTextMouseListener(textField);
     }
 
-    public CountTypeComboBoxItemListener getCountTypeComboBoxItemListener(JLabel label){
+    public CountTypeComboBoxItemListener getCountTypeComboBoxItemListener(JLabel label) {
         return new CountTypeComboBoxItemListener(label);
     }
 
     public NoteEditDialogComboBoxItemListener getNoteEditDialogComboBoxItemListener(JDialog dialog, String table) {
         return new NoteEditDialogComboBoxItemListener(dialog, table);
     }
+
 
     public SaveNoteButtonActionListener getSaveNoteButtonActionListener(
             NoteEditDialog dialog,
@@ -549,6 +559,59 @@ public class Controller {
         }
     }
 
+    private class ItemsTitleTextFieldKeyListener implements KeyListener {
+
+        private JComboBox<String> itemsComboBox;
+
+        ItemsTitleTextFieldKeyListener(JComboBox<String> itemsComboBox) {
+            this.itemsComboBox = itemsComboBox;
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+
+            if (!(e.getSource() instanceof JTextField)) {
+                return;
+            }
+
+            if (itemsComboBox.isPopupVisible()) {
+                itemsComboBox.hidePopup();
+            }
+
+            itemsComboBox.removeAllItems();
+
+            JTextField textField = (JTextField) e.getSource();
+
+            if (textField.getText().length() < 2) {
+                return;
+            }
+
+            Set<String> items = model.getItemsSet();
+
+
+            for (String s : items) {
+                if (s.toLowerCase().contains(textField.getText().toLowerCase())) {
+                    itemsComboBox.addItem(s);
+                }
+            }
+
+            if (itemsComboBox.getItemCount() > 0) {
+                itemsComboBox.showPopup();
+            }
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
+        }
+    }
+
     private class NumericTextFieldFocusListener implements FocusListener {
         private String defaultValue;
         private Class type;
@@ -582,6 +645,71 @@ public class Controller {
             }
 
             textField.setText(text);
+        }
+    }
+
+    private class TotalCalcTextFieldFocusListener implements FocusListener {
+        private JTextField priceTextField;
+        private JTextField countTextField;
+
+        TotalCalcTextFieldFocusListener(JTextField priceTextField, JTextField countTextField) {
+            this.priceTextField = priceTextField;
+            this.countTextField = countTextField;
+        }
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (!(e.getSource() instanceof JTextField)) {
+                return;
+            }
+
+            float price;
+            float count;
+
+            try {
+                price = Float.parseFloat(priceTextField.getText());
+                count = Float.parseFloat(countTextField.getText());
+            } catch (Exception ex) {
+                DefaultExceptionHandler.handleException(ex);
+                return;
+            }
+
+            JTextField totalTextField = (JTextField) e.getSource();
+
+            if (price > 0f && count > 0f) {
+                totalTextField.setText(String.format(Note.PRICE_FORMAT, price * count));
+            }
+
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            if (!(e.getSource() instanceof JTextField)) {
+                return;
+            }
+
+            float price;
+            float count;
+
+            try {
+                price = Float.parseFloat(priceTextField.getText());
+                count = Float.parseFloat(countTextField.getText());
+            } catch (Exception ex) {
+                DefaultExceptionHandler.handleException(ex);
+                return;
+            }
+
+            JTextField totalTextField = (JTextField) e.getSource();
+
+            if (price == 0f && count > 0f) {
+                try {
+                    float total = Float.parseFloat(totalTextField.getText());
+                    priceTextField.setText(String.format(Note.PRICE_FORMAT, total / count));
+                } catch (Exception ex) {
+                    DefaultExceptionHandler.handleException(ex);
+                }
+            }
+
         }
     }
 
@@ -628,7 +756,7 @@ public class Controller {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            label.setText(prefix + ((SimpleData)e.getItem()).toString() + "):");
+            label.setText(prefix + ((SimpleData) e.getItem()).toString() + "):");
         }
     }
 

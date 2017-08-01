@@ -126,9 +126,16 @@ public class NoteEditDialog extends JDialog {
         add(label1);
 
         JTextField itemNameTextField = new JTextField(note.getItem());
-        itemNameTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        itemNameTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine, secondColElementWidth, ELEMENT_HEIGHT);
         itemNameTextField.setToolTipText("Укажите наименование товара. Например: Мыло.");
         add(itemNameTextField);
+
+        JComboBox<String> itemsComboBox = new JComboBox<>();
+        //itemsComboBox.addItemListener(controller.getNoteEditDialogComboBoxItemListener(this, "item_types"));
+        itemsComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        add(itemsComboBox);
+
+        itemNameTextField.addKeyListener(controller.getItemsTitleTextFieldKeyListener(itemsComboBox));
 
         JLabel label2 = new JLabel("Тип: ");
         label2.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
@@ -178,6 +185,7 @@ public class NoteEditDialog extends JDialog {
 
         JTextField totalTextField = new JTextField("" + note.getTotalAsString());
         totalTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f), 2));
+        totalTextField.addFocusListener(controller.getTotalCalcTextFieldFocusListener(itemPriceTextField, itemsCountTextField));
         totalTextField.addMouseListener(controller.getSelectAllTextMouseListener(totalTextField));
         totalTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
         totalTextField.setToolTipText("Значение будет вычислено автоматически, если заполены предыдущие поля (цена и количество).");

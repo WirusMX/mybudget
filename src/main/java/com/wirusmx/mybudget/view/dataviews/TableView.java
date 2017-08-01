@@ -81,7 +81,12 @@ public class TableView extends DataView {
 
     @Override
     public Note getSelectedValue() {
-        return notes.get(table.getSelectedRow());
+        int pos = table.getSelectedRow();
+        if (pos >= 0) {
+            return notes.get(pos);
+        }
+
+        return null;
     }
 
     @Override

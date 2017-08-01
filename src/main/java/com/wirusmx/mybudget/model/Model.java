@@ -289,15 +289,15 @@ public class Model {
                 text = text.substring(0, pos + cutNum + 1);
             }
 
-            if (pos == text.length() - 1 && text.length() - 1 > 0){
+            if (pos == text.length() - 1 && text.length() - 1 > 0) {
                 text = text.substring(0, pos);
             }
 
-            if (pos == 0 && text.length() > 1){
+            if (pos == 0 && text.length() > 1) {
                 text = "0" + text;
             }
 
-            if (pos == 0 && text.length() - 1 == 0){
+            if (pos == 0 && text.length() - 1 == 0) {
                 text = "";
             }
         }
@@ -446,6 +446,23 @@ public class Model {
         } catch (IOException e) {
             DefaultExceptionHandler.handleException(e);
         }
+    }
+
+    public Set<String> getItemsSet() {
+        List<String> result;
+        try {
+            result = template.query("SELECT itemTitle FROM product;", new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                    return resultSet.getString("itemTitle");
+                }
+            });
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(ex);
+            result = new ArrayList<>();
+        }
+
+        return new TreeSet<>(result);
     }
 
     private class ComboBoxValuesComparator implements Comparator<SimpleData> {
