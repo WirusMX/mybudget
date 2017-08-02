@@ -31,17 +31,18 @@ public class Controller {
     }
 
     public void startApplication() {
-        model.init();
-        view.init();
+        try {
+            model.init();
+            view.init();
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(this, ex);
+        }
     }
 
     public Set<SimpleData> getComboBoxValues(String tableName) {
         return model.getComboBoxValues(tableName);
     }
 
-    public int insertNewValue(String value, String table) {
-        return model.insertNewComboBoxValue(value, table);
-    }
 
     public List<Note> getNotes() {
         return model.getNotes();
@@ -162,6 +163,10 @@ public class Controller {
         return new ItemsTitleTextFieldKeyListener(itemsComboBox);
     }
 
+    public ItemsComboBoxItemListener getItemsComboBoxItemListener(JTextField textField) {
+        return new ItemsComboBoxItemListener(textField);
+    }
+
     public NumericTextFieldFocusListener getNumericTextFieldFocusListener(Class type, String defaultValue, int cutNum) {
         return new NumericTextFieldFocusListener(type, defaultValue, cutNum);
     }
@@ -191,7 +196,6 @@ public class Controller {
             JTextField itemPriceTextField,
             JTextField itemCountTextField,
             JComboBox countTypeComboBox,
-            JTextField totalTextField,
             JComboBox shopComboBox,
             JComboBox necessityLevelComboBox,
             JComboBox qualityLevelComboBox,
@@ -208,7 +212,6 @@ public class Controller {
                 itemPriceTextField,
                 itemCountTextField,
                 countTypeComboBox,
-                totalTextField,
                 shopComboBox,
                 necessityLevelComboBox,
                 qualityLevelComboBox,
@@ -284,11 +287,15 @@ public class Controller {
     }
 
     public void showErrorMessage(Throwable ex) {
-
+        JOptionPane.showMessageDialog(view, "ОШИБКА: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
     }
 
     public int getDataViewID() {
         return model.getDataViewID();
+    }
+
+    private int insertNewValue(String value, String table) {
+        return model.insertNewComboBoxValue(value, table);
     }
 
     private class AddNewNoteButtonActionListener implements ActionListener {
@@ -395,11 +402,12 @@ public class Controller {
         private Class dataViewClass;
         private int id;
 
-        public DataViewButtonActionListener(Class dataViewClass, int id) {
+        DataViewButtonActionListener(Class dataViewClass, int id) {
             this.dataViewClass = dataViewClass;
             this.id = id;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void actionPerformed(ActionEvent e) {
             model.setDataViewID(id);
@@ -411,6 +419,7 @@ public class Controller {
     private class SettingsButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+
         }
     }
 
@@ -442,7 +451,6 @@ public class Controller {
         @Override
         public void actionPerformed(ActionEvent e) {
             JLabel messageLabel = new JLabel(model.readTextFromFile("using_rules.txt"));
-            //messageTextArea.setEditable(false);
             messageLabel.setFont(new Font("Monospased", Font.PLAIN, 12));
             JScrollPane scrollPane = new JScrollPane(messageLabel);
             scrollPane.setPreferredSize(new Dimension(600, 500));
@@ -464,11 +472,13 @@ public class Controller {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            if (!(e.getSource() instanceof JComboBox)) {
+            JComboBox periodTypeComboBox;
+            if (e.getSource() instanceof JComboBox) {
+                periodTypeComboBox = (JComboBox) e.getSource();
+            } else {
                 return;
             }
 
-            JComboBox<SimpleData> periodTypeComboBox = (JComboBox) e.getSource();
             int periodType = ((SimpleData) periodTypeComboBox.getSelectedItem()).getId();
             model.setSelectedPeriodType(periodType);
 
@@ -482,11 +492,13 @@ public class Controller {
     private class PeriodComboBoxItemListener implements ItemListener {
         @Override
         public void itemStateChanged(ItemEvent e) {
-            if (!(e.getSource() instanceof JComboBox)) {
+            JComboBox periodComboBox;
+            if (e.getSource() instanceof JComboBox) {
+                periodComboBox = (JComboBox) e.getSource();
+            } else {
                 return;
             }
 
-            JComboBox<SimpleData> periodComboBox = (JComboBox) e.getSource();
             String selectedPeriod = ((String) periodComboBox.getSelectedItem());
             if (selectedPeriod == null) {
                 model.setSelectedPeriod("");
@@ -502,11 +514,15 @@ public class Controller {
     private class SortTypeComboBoxItemListener implements ItemListener {
         @Override
         public void itemStateChanged(ItemEvent e) {
-            if (!(e.getSource() instanceof JComboBox)) {
+            JComboBox sortTypeComboBox;
+
+            if (e.getSource() instanceof JComboBox) {
+                sortTypeComboBox = (JComboBox) e.getSource();
+            } else {
                 return;
             }
 
-            JComboBox<SimpleData> sortTypeComboBox = (JComboBox) e.getSource();
+
             int selectedSortType = ((SimpleData) sortTypeComboBox.getSelectedItem()).getId();
 
             model.setSelectedSortType(selectedSortType);
@@ -517,11 +533,14 @@ public class Controller {
     private class SortOrderComboBoxItemListener implements ItemListener {
         @Override
         public void itemStateChanged(ItemEvent e) {
-            if (!(e.getSource() instanceof JComboBox)) {
+            JComboBox sortTypeComboBox;
+
+            if (e.getSource() instanceof JComboBox) {
+                sortTypeComboBox = (JComboBox) e.getSource();
+            } else {
                 return;
             }
 
-            JComboBox<SimpleData> sortTypeComboBox = (JComboBox) e.getSource();
             int sortOrder = ((SimpleData) sortTypeComboBox.getSelectedItem()).getId();
 
             model.setSelectedSortOrder(sortOrder);
@@ -569,9 +588,11 @@ public class Controller {
 
         @Override
         public void keyTyped(KeyEvent e) {
+            JTextField textField;
 
-
-            if (!(e.getSource() instanceof JTextField)) {
+            if (e.getSource() instanceof JTextField) {
+                textField = (JTextField) e.getSource();
+            } else {
                 return;
             }
 
@@ -580,8 +601,6 @@ public class Controller {
             }
 
             itemsComboBox.removeAllItems();
-
-            JTextField textField = (JTextField) e.getSource();
 
             if (textField.getText().length() < 2) {
                 return;
@@ -597,8 +616,10 @@ public class Controller {
             }
 
             if (itemsComboBox.getItemCount() > 0) {
+                itemsComboBox.setSelectedIndex(-1);
                 itemsComboBox.showPopup();
             }
+
         }
 
         @Override
@@ -608,6 +629,32 @@ public class Controller {
 
         @Override
         public void keyReleased(KeyEvent e) {
+            if (e.getExtendedKeyCode() == KeyEvent.VK_DOWN) {
+                itemsComboBox.requestFocusInWindow();
+            }
+        }
+    }
+
+    private class ItemsComboBoxItemListener implements ItemListener {
+
+        JTextField itemTextField;
+
+        ItemsComboBoxItemListener(JTextField itemTextField) {
+            this.itemTextField = itemTextField;
+        }
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (!(e.getSource() instanceof JComboBox) || e.getStateChange() == ItemEvent.DESELECTED) {
+                return;
+            }
+
+            JComboBox comboBox = (JComboBox) e.getSource();
+
+            if (comboBox.isPopupVisible()) {
+                itemTextField.setText((String) comboBox.getSelectedItem());
+                itemTextField.requestFocusInWindow();
+            }
 
         }
     }
@@ -716,7 +763,7 @@ public class Controller {
     private class SelectAllTextMouseListener implements MouseListener {
         private JTextField textField;
 
-        public SelectAllTextMouseListener(JTextField textField) {
+        SelectAllTextMouseListener(JTextField textField) {
             this.textField = textField;
         }
 
@@ -750,13 +797,13 @@ public class Controller {
         private JLabel label;
         private String prefix = "Цена (руб./";
 
-        public CountTypeComboBoxItemListener(JLabel label) {
+        CountTypeComboBoxItemListener(JLabel label) {
             this.label = label;
         }
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            label.setText(prefix + ((SimpleData) e.getItem()).toString() + "):");
+            label.setText(prefix + e.getItem().toString() + "):");
         }
     }
 
@@ -808,7 +855,6 @@ public class Controller {
         private JTextField itemPriceTextField;
         private JTextField itemCountTextField;
         private JComboBox countTypeComboBox;
-        private JTextField totalTextField;
         private JComboBox shopComboBox;
         private JComboBox necessityLevelComboBox;
         private JComboBox qualityLevelComboBox;
@@ -824,7 +870,6 @@ public class Controller {
                                      JTextField itemPriceTextField,
                                      JTextField itemCountTextField,
                                      JComboBox countTypeComboBox,
-                                     JTextField totalTextField,
                                      JComboBox shopComboBox,
                                      JComboBox necessityLevelComboBox,
                                      JComboBox qualityLevelComboBox,
@@ -839,7 +884,6 @@ public class Controller {
             this.itemPriceTextField = itemPriceTextField;
             this.itemCountTextField = itemCountTextField;
             this.countTypeComboBox = countTypeComboBox;
-            this.totalTextField = totalTextField;
             this.shopComboBox = shopComboBox;
             this.necessityLevelComboBox = necessityLevelComboBox;
             this.qualityLevelComboBox = qualityLevelComboBox;
@@ -908,11 +952,14 @@ public class Controller {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            if (!(e.getSource() instanceof JComboBox)) {
+            JComboBox periodComboBox;
+            if (e.getSource() instanceof JComboBox) {
+                periodComboBox = (JComboBox) e.getSource();
+            } else {
                 return;
             }
 
-            JComboBox<String> periodComboBox = (JComboBox) e.getSource();
+
             String period = (String) periodComboBox.getSelectedItem();
 
             dialog.setSelectedPeriod(period);
@@ -929,11 +976,14 @@ public class Controller {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            if (!(e.getSource() instanceof JComboBox)) {
+            JComboBox periodComboBox;
+            if (e.getSource() instanceof JComboBox) {
+                periodComboBox = (JComboBox) e.getSource();
+            } else {
                 return;
             }
 
-            JComboBox<SimpleData> periodComboBox = (JComboBox) e.getSource();
+
             int typeID = ((SimpleData) periodComboBox.getSelectedItem()).getId();
 
             dialog.setSelectedItemType(typeID);

@@ -14,6 +14,6 @@ public class ShopComparator extends MyComparator<Note> {
 
     @Override
     int compareNotes(Note o1, Note o2) {
-        return o1.getShop().toString().toLowerCase().compareTo(o2.getShop().toString().toLowerCase()) * order;
+        return o1.getShop().toString().toLowerCase().compareTo(o2.getShop().toString().toLowerCase()) * sortOrder;
     }
 }

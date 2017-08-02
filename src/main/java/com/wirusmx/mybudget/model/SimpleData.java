@@ -1,6 +1,8 @@
 package com.wirusmx.mybudget.model;
 
 /**
+ * Structure for the storage pair (id, title).
+ *
  * @author Piunov M (aka WirusMX)
  */
 public class SimpleData {
@@ -12,16 +14,15 @@ public class SimpleData {
         this.title = title;
     }
 
-    @Override
-    public String toString() {
-        return title;
-    }
-
     public int getId() {
         return id;
     }
 
-    String getTitle() {
+    /**
+     * @return title
+     */
+    @Override
+    public String toString() {
         return title;
     }
 

@@ -116,7 +116,7 @@ public class TableView extends DataView {
             }
             tableModel.addRow(
                     new String[]{
-                            n.getItem(),
+                            n.getItemTitle(),
                             n.getShop().toString(),
                             n.getCountAsString() + " " + n.getCountType(),
                             total,

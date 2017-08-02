@@ -24,6 +24,6 @@ public class SaleComparator extends MyComparator<Note> {
             result = 1;
         }
 
-        return result * order;
+        return result * sortOrder;
     }
 }

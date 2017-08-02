@@ -125,14 +125,14 @@ public class NoteEditDialog extends JDialog {
         label1.setBounds(FIRST_COL_X_POS, Y0 + DELTA_Y * elementsLine, LABEL_WIDTH, ELEMENT_HEIGHT);
         add(label1);
 
-        JTextField itemNameTextField = new JTextField(note.getItem());
+        JTextField itemNameTextField = new JTextField(note.getItemTitle());
         itemNameTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine, secondColElementWidth, ELEMENT_HEIGHT);
         itemNameTextField.setToolTipText("Укажите наименование товара. Например: Мыло.");
         add(itemNameTextField);
 
         JComboBox<String> itemsComboBox = new JComboBox<>();
-        //itemsComboBox.addItemListener(controller.getNoteEditDialogComboBoxItemListener(this, "item_types"));
-        itemsComboBox.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
+        itemsComboBox.addItemListener(controller.getItemsComboBoxItemListener(itemNameTextField));
+        itemsComboBox.setBounds(SECOND_COL_X_POS, Y0 + ELEMENT_HEIGHT + DELTA_Y * elementsLine++, secondColElementWidth, 0);
         add(itemsComboBox);
 
         itemNameTextField.addKeyListener(controller.getItemsTitleTextFieldKeyListener(itemsComboBox));
@@ -271,7 +271,6 @@ public class NoteEditDialog extends JDialog {
                         itemPriceTextField,
                         itemsCountTextField,
                         countTypeComboBox,
-                        totalTextField,
                         shopComboBox,
                         necessityLevelComboBox,
                         qualityLevelComboBox,

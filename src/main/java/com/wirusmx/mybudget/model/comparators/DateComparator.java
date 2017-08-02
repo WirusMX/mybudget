@@ -18,6 +18,6 @@ public class DateComparator extends MyComparator<Note> {
 
         String date2 = o2.getYear() + "." + o2.getMonth() + "." + o2.getDay();
 
-        return date1.compareTo(date2) * order;
+        return date1.compareTo(date2) * sortOrder;
     }
 }

@@ -77,23 +77,24 @@ public class View extends JFrame {
         setVisible(true);
     }
 
-
+    /**
+     * Updates data on main frame.
+     */
     public void update() {
-
         java.util.List<Note> notes = controller.getNotes();
         currentDataView.setNotes(notes);
 
-        float summ = 0;
-        float[] necSum = new float[2];
+        float total = 0;
+        float[] totalByNecessity = new float[2];
 
         for (Note n : notes) {
-            summ += n.getTotal();
-            necSum[n.getNecessity().getId()] += n.getTotal();
+            total += n.getTotal();
+            totalByNecessity[n.getNecessity().getId()] += n.getTotal();
         }
 
-        statLabel.setText("Итого: " + String.format(Note.PRICE_FORMAT, summ) + " руб., из них "
-                + String.format(Note.PRICE_FORMAT, necSum[0]) + " руб. на товары высокой необходимости, "
-                + String.format(Note.PRICE_FORMAT, necSum[1]) + " руб. - низкой необходимости");
+        statLabel.setText("Итого: " + String.format(Note.PRICE_FORMAT, total) + " руб., из них "
+                + String.format(Note.PRICE_FORMAT, totalByNecessity[0]) + " руб. на товары высокой необходимости, "
+                + String.format(Note.PRICE_FORMAT, totalByNecessity[1]) + " руб. - низкой необходимости");
     }
 
     public void setDataView(Class<DataView> dataView) {
@@ -105,7 +106,7 @@ public class View extends JFrame {
             currentDataView = dataView.newInstance();
 
             currentDataView.addMouseListener(controller.getEditNoteActionListener(currentDataView));
-            currentDataView.setComponentPopupMenu(getNotesListPopupMenu());
+            currentDataView.setComponentPopupMenu(createNotesListPopupMenu());
 
             centerPanel.add(currentDataView, BorderLayout.CENTER);
             revalidate();
@@ -139,7 +140,7 @@ public class View extends JFrame {
         JMenu fileMenu = new JMenu("Файл");
 
         fileMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Новая запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK),
                         controller.getAddNewNoteButtonActionListener(),
@@ -148,7 +149,7 @@ public class View extends JFrame {
         );
 
         fileMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Изменить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
                         controller.getEditNoteActionListener(currentDataView),
@@ -157,7 +158,7 @@ public class View extends JFrame {
         );
 
         fileMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Удалить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
                         controller.getRemoveNoteButtonActionListener(currentDataView),
@@ -168,7 +169,7 @@ public class View extends JFrame {
         fileMenu.addSeparator();
 
         fileMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Выход",
                         KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.ALT_MASK),
                         controller.getExitButtonButtonActionListener(),
@@ -181,7 +182,7 @@ public class View extends JFrame {
         JMenu viewMenu = new JMenu("Вид");
 
         viewMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Список",
                         KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK),
                         controller.getDataViewButtonActionListener(dataViews[0], 0),
@@ -190,7 +191,7 @@ public class View extends JFrame {
         );
 
         viewMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Таблица",
                         KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK),
                         controller.getDataViewButtonActionListener(dataViews[1], 1),
@@ -203,7 +204,7 @@ public class View extends JFrame {
         JMenu toolsMenu = new JMenu("Инструменты");
 
         toolsMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Статистика",
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK),
                         controller.getStatisticsButtonActionListener(),
@@ -213,22 +214,21 @@ public class View extends JFrame {
 
         toolsMenu.addSeparator();
 
-        /*
         toolsMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Настройки",
                         KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK),
                         controller.getSettingsButtonActionListener(),
                         "settings"
                 )
-        );*/
+        );
 
         menuBar.add(toolsMenu);
 
         JMenu infoMenu = new JMenu("Справка");
 
         infoMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "О программе",
                         null,
                         controller.getAboutButtonActionListener(),
@@ -237,7 +237,7 @@ public class View extends JFrame {
         );
 
         infoMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Правила пользования ПО",
                         null,
                         controller.getUsingRulesButtonActionListener(),
@@ -246,8 +246,6 @@ public class View extends JFrame {
         );
 
         menuBar.add(infoMenu);
-
-
     }
 
     private void addControlPanel(JMenuBar menuBar) {
@@ -307,11 +305,11 @@ public class View extends JFrame {
         menuBar.add(resetButton);
     }
 
-    private JPopupMenu getNotesListPopupMenu() {
+    private JPopupMenu createNotesListPopupMenu() {
         JPopupMenu popupMenu = new JPopupMenu();
 
         popupMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Новая запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK),
                         controller.getAddNewNoteButtonActionListener(),
@@ -320,7 +318,7 @@ public class View extends JFrame {
         );
 
         popupMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Изменить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
                         controller.getEditNoteActionListener(currentDataView),
@@ -329,7 +327,7 @@ public class View extends JFrame {
         );
 
         popupMenu.add(
-                getMenuItem(
+                createMenuItem(
                         "Удалить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
                         controller.getRemoveNoteButtonActionListener(currentDataView),
@@ -340,7 +338,7 @@ public class View extends JFrame {
         return popupMenu;
     }
 
-    private JMenuItem getMenuItem(String title, KeyStroke keyStroke, ActionListener actionListener, String imageName) {
+    private JMenuItem createMenuItem(String title, KeyStroke keyStroke, ActionListener actionListener, String imageName) {
         JMenuItem menuItem = new JMenuItem(title);
         if (keyStroke != null) {
             menuItem.setAccelerator(keyStroke);

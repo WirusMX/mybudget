@@ -1,7 +1,6 @@
 package com.wirusmx.mybudget.model;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
-import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.comparators.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,7 +21,6 @@ public class Model {
     private static final String IMAGES_FILES_EXT = ".png";
 
     private JdbcTemplate template;
-    private Controller controller;
     private String applicationVersion;
 
     private Properties userSettings;
@@ -36,9 +34,8 @@ public class Model {
     private String searchQuery = "";
     private int dataViewID = 0;
 
-    public Model(JdbcTemplate template, Controller controller, String applicationVersion) {
+    Model(JdbcTemplate template, String applicationVersion) {
         this.template = template;
-        this.controller = controller;
         this.applicationVersion = applicationVersion;
     }
 
@@ -77,7 +74,7 @@ public class Model {
         this.selectedSortOrder = selectedSortOrder;
         setUserSettingsValue("main.window.sort.order", "" + selectedSortOrder);
         for (MyComparator c : comparators) {
-            c.setOrder(selectedSortOrder);
+            c.setSortOrder(selectedSortOrder);
         }
     }
 
@@ -95,47 +92,9 @@ public class Model {
     }
 
     public void init() {
+        initDataBase();
 
-        template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                "itemTitle TEXT, typeID INTEGER, price REAL, count REAL, countTypeID INTEGER, shopID INTEGER, " +
-                "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
-                "month TEXT, year TEXT);");
-
-        template.execute("CREATE TABLE IF NOT EXISTS item_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT);");
-        template.execute("INSERT OR REPLACE INTO item_types (id, title) VALUES (0, 'Прочее')");
-
-        template.execute("CREATE TABLE IF NOT EXISTS count_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT);");
-        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (0, 'шт.')");
-        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (1, 'кг.')");
-        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (2, 'л.')");
-
-        template.execute("CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT);");
-        template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее')");
-
-        template.execute("CREATE TABLE IF NOT EXISTS application (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT)");
-        template.execute("INSERT OR REPLACE INTO application (id, version) VALUES (0, '" + applicationVersion + "')");
-
-        userSettings = new Properties();
-        if (new java.io.File(USER_SETTINGS_PROPERTIES_PATH).exists()) {
-            try {
-                userSettings.load(new FileInputStream(USER_SETTINGS_PROPERTIES_PATH));
-            } catch (IOException e) {
-                DefaultExceptionHandler.handleException(e);
-            }
-        }
-        selectedPeriodType = Integer.parseInt(getUserSettingsValue("main.window.period.type",
-                "" + selectedPeriodType));
-        selectedPeriod = getUserSettingsValue("main.window.period", selectedPeriod);
-        selectedSortType = Integer.parseInt(getUserSettingsValue("main.window.sort.type",
-                "" + selectedSortType));
-        selectedSortOrder = Integer.parseInt(getUserSettingsValue("main.window.sort.order",
-                "" + selectedSortOrder));
-
-        dataViewID = Integer.parseInt(getUserSettingsValue("main.window.data.view.id",
-                "" + dataViewID));
+        loadUserSettings();
 
         comparators = new MyComparator[]{
                 new DateComparator(selectedSortOrder),
@@ -174,7 +133,7 @@ public class Model {
         template.execute("INSERT INTO product (itemTitle, typeID, price, count, countTypeID, shopID, " +
                 "necessityID, qualityID, bySale, day, month, year) " +
                 "VALUES ("
-                + "'" + note.getItem() + "', "
+                + "'" + note.getItemTitle() + "', "
                 + note.getType().getId() + ", "
                 + note.getPrice() + ", "
                 + note.getCount() + ", "
@@ -201,7 +160,7 @@ public class Model {
                 "necessityID, qualityID, bySale, day, month, year) " +
                 "VALUES ("
                 + note.getId() + ", "
-                + "'" + note.getItem() + "', "
+                + "'" + note.getItemTitle() + "', "
                 + note.getType().getId() + ", "
                 + note.getPrice() + ", "
                 + note.getCount() + ", "
@@ -276,6 +235,51 @@ public class Model {
         return "";
     }
 
+    private void initDataBase() {
+        template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
+                "itemTitle TEXT, typeID INTEGER, price REAL, count REAL, countTypeID INTEGER, shopID INTEGER, " +
+                "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
+                "month TEXT, year TEXT);");
+
+        template.execute("CREATE TABLE IF NOT EXISTS item_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "title TEXT);");
+        template.execute("INSERT OR REPLACE INTO item_types (id, title) VALUES (0, 'Прочее')");
+
+        template.execute("CREATE TABLE IF NOT EXISTS count_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "title TEXT);");
+        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (0, 'шт.')");
+        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (1, 'кг.')");
+        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (2, 'л.')");
+
+        template.execute("CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "title TEXT);");
+        template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее')");
+
+        template.execute("CREATE TABLE IF NOT EXISTS application (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT)");
+        template.execute("INSERT OR REPLACE INTO application (id, version) VALUES (0, '" + applicationVersion + "')");
+    }
+
+    private void loadUserSettings() {
+        userSettings = new Properties();
+        if (new File(USER_SETTINGS_PROPERTIES_PATH).exists()) {
+            try {
+                userSettings.load(new FileInputStream(USER_SETTINGS_PROPERTIES_PATH));
+            } catch (IOException e) {
+                DefaultExceptionHandler.handleException(e);
+            }
+        }
+        selectedPeriodType = Integer.parseInt(getUserSettingsValue("main.window.period.type",
+                "" + selectedPeriodType));
+        selectedPeriod = getUserSettingsValue("main.window.period", selectedPeriod);
+        selectedSortType = Integer.parseInt(getUserSettingsValue("main.window.sort.type",
+                "" + selectedSortType));
+        selectedSortOrder = Integer.parseInt(getUserSettingsValue("main.window.sort.order",
+                "" + selectedSortOrder));
+
+        dataViewID = Integer.parseInt(getUserSettingsValue("main.window.data.view.id",
+                "" + dataViewID));
+    }
+
     private String stringToFloatFormat(String text, int cutNum) {
         if (!text.matches("\\d+")) {
             text = text.replaceAll(",", ".");
@@ -307,14 +311,14 @@ public class Model {
 
     private String stringToIntegerFormat(String text) {
         if (!text.matches("\\d+")) {
-            text.replaceAll("\\D", "");
+            text = text.replaceAll("\\D", "");
         }
 
         return text;
-
     }
 
-    private List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery) {
+    @SuppressWarnings("unchecked")
+    List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery) {
         String period = "";
 
         List<Note> result = new ArrayList<>();
@@ -369,7 +373,7 @@ public class Model {
             String sq = searchQuery.toLowerCase();
 
             for (Note n : result) {
-                if (n.getItem().toLowerCase().contains(sq)) {
+                if (n.getItemTitle().toLowerCase().contains(sq)) {
                     temp.add(n);
                 }
             }
@@ -476,7 +480,7 @@ public class Model {
                 return 1;
             }
 
-            return o1.getTitle().toLowerCase().compareTo(o2.getTitle().toLowerCase());
+            return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
         }
     }
 

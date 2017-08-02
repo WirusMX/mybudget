@@ -14,6 +14,6 @@ public class PriceComparator extends MyComparator<Note> {
 
     @Override
     int compareNotes(Note o1, Note o2) {
-        return (int)((o1.getPrice() - o2.getPrice()) * 100) * order;
+        return (int)((o1.getPrice() - o2.getPrice()) * 100) * sortOrder;
     }
 }
