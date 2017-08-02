@@ -169,7 +169,7 @@ public class StatisticsDialog extends JDialog {
 
         drawGrid(graphics, panelWidth, x, y, x0, y0, yMin);
         drawXLabels(graphics, x, y0);
-        drawYLabels(graphics, x, y, x0, yMin, maxValue);
+        drawYLabels(graphics, y, x0, yMin, maxValue);
         drawLegend(graphics, x0, y0, xMax);
         drawStatistics(graphics, x, y0 - y[y.length - 1], values, maxValue, y0);
     }
@@ -227,7 +227,7 @@ public class StatisticsDialog extends JDialog {
         graphics.drawString("Месяцы", x[x.length - 1] + 10, y0 - 10);
     }
 
-    private void drawYLabels(Graphics2D graphics, int[] x, int[] y, int x0, int yMin, float maxValue) {
+    private void drawYLabels(Graphics2D graphics, int[] y, int x0, int yMin, float maxValue) {
         graphics.setColor(Color.BLACK);
 
         for (int i = 1; i < y.length; i++) {

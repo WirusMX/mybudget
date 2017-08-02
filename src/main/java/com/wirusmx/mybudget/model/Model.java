@@ -184,7 +184,7 @@ public class Model {
         try (BufferedReader reader
                      = new BufferedReader(
                 new InputStreamReader(
-                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName)))) {
+                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName), "UTF-8"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result += line + "\n";
