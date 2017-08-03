@@ -41,13 +41,13 @@ public class View extends JFrame {
     }
 
     public void init() {
-/*
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
 
         }
-*/
+
         setTitle(applicationTitle + " v." + applicationVersion);
         setIconImage(controller.getImage("favicon").getImage());
         setBounds(0, 0, 1024, 600);
@@ -56,6 +56,7 @@ public class View extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         centerPanel = new JPanel(new BorderLayout());
+        //noinspection unchecked
         setDataView(dataViews[controller.getDataViewID()]);
 
         JMenuBar mainMenu = new JMenuBar();

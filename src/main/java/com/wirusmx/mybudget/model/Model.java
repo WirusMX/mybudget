@@ -1,6 +1,7 @@
 package com.wirusmx.mybudget.model;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
+import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.comparators.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +21,7 @@ public class Model {
     private static final String IMAGES_FILES_PREFIX = "/images/";
     private static final String IMAGES_FILES_EXT = ".png";
 
+    private Controller controller;
     private JdbcTemplate template;
     private String applicationVersion;
 
@@ -34,7 +36,8 @@ public class Model {
     private String searchQuery = "";
     private int dataViewID = 0;
 
-    Model(JdbcTemplate template, String applicationVersion) {
+    Model(Controller controller, JdbcTemplate template, String applicationVersion) {
+        this.controller = controller;
         this.template = template;
         this.applicationVersion = applicationVersion;
     }
@@ -94,6 +97,8 @@ public class Model {
     public void init() {
         initDataBase();
 
+        inspectDatabase();
+
         loadUserSettings();
 
         comparators = new MyComparator[]{
@@ -124,27 +129,51 @@ public class Model {
         return values;
     }
 
+    /**
+     * Insert new combo box value to database.
+     *
+     * @param value - value for inserting;
+     * @param table - table for inserting.
+     * @return id of inserted value in database table,
+     * or -1 if any problems occurred during insertion operation.
+     */
     public int insertNewComboBoxValue(String value, String table) {
-        template.execute("INSERT OR REPLACE INTO " + table + " (title) VALUES ('" + value + "');");
-        return template.queryForObject("SELECT id from " + table + " WHERE title LIKE '" + value + "';", Integer.class);
+        int result = -1;
+        try {
+            template.execute("INSERT OR REPLACE INTO " + table + " (title) VALUES ('" + value + "');");
+            result = template.queryForObject("SELECT id from " + table + " WHERE title LIKE '" + value + "';", Integer.class);
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(controller, ex, "Ошибка базы данных!");
+        }
+
+        return result;
     }
 
     public void insertNote(Note note) {
-        template.execute("INSERT INTO product (itemTitle, typeID, price, count, countTypeID, shopID, " +
-                "necessityID, qualityID, bySale, day, month, year) " +
-                "VALUES ("
-                + "'" + note.getItemTitle() + "', "
-                + note.getType().getId() + ", "
-                + note.getPrice() + ", "
-                + note.getCount() + ", "
-                + note.getCountType().getId() + ", "
-                + note.getShop().getId() + ", "
-                + note.getNecessity().getId() + ", "
-                + note.getQuality().getId() + ", "
-                + (note.isBySale() ? 1 : 0) + ", "
-                + "'" + note.getDay() + "', "
-                + "'" + note.getMonth() + "', "
-                + "'" + note.getYear() + "');");
+
+        try {
+            if (note.getItemTitle().isEmpty()){
+                throw new RuntimeException("Empty item title");
+            }
+
+            template.execute("INSERT INTO product (itemTitle, typeID, price, count, countTypeID, shopID, " +
+                    "necessityID, qualityID, bySale, day, month, year) " +
+                    "VALUES ("
+                    + "'" + note.getItemTitle() + "', "
+                    + note.getType().getId() + ", "
+                    + note.getPrice() + ", "
+                    + note.getCount() + ", "
+                    + note.getCountType().getId() + ", "
+                    + note.getShop().getId() + ", "
+                    + note.getNecessity().getId() + ", "
+                    + note.getQuality().getId() + ", "
+                    + (note.isBySale() ? 1 : 0) + ", "
+                    + "'" + note.getDay() + "', "
+                    + "'" + note.getMonth() + "', "
+                    + "'" + note.getYear() + "');");
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(controller, ex, "Ошибка базы данных!");
+        }
     }
 
     public List<Note> getNotes(int selectedPeriodType, String selectedPeriod) {
@@ -156,26 +185,34 @@ public class Model {
     }
 
     public void updateNote(Note note) {
-        template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, count, countTypeID, shopID, " +
-                "necessityID, qualityID, bySale, day, month, year) " +
-                "VALUES ("
-                + note.getId() + ", "
-                + "'" + note.getItemTitle() + "', "
-                + note.getType().getId() + ", "
-                + note.getPrice() + ", "
-                + note.getCount() + ", "
-                + note.getCountType().getId() + ", "
-                + note.getShop().getId() + ", "
-                + note.getNecessity().getId() + ", "
-                + note.getQuality().getId() + ", "
-                + (note.isBySale() ? 1 : 0) + ", "
-                + "'" + note.getDay() + "', "
-                + "'" + note.getMonth() + "', "
-                + "'" + note.getYear() + "');");
+        try {
+            template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, count, countTypeID, shopID, " +
+                    "necessityID, qualityID, bySale, day, month, year) " +
+                    "VALUES ("
+                    + note.getId() + ", "
+                    + "'" + note.getItemTitle() + "', "
+                    + note.getType().getId() + ", "
+                    + note.getPrice() + ", "
+                    + note.getCount() + ", "
+                    + note.getCountType().getId() + ", "
+                    + note.getShop().getId() + ", "
+                    + note.getNecessity().getId() + ", "
+                    + note.getQuality().getId() + ", "
+                    + (note.isBySale() ? 1 : 0) + ", "
+                    + "'" + note.getDay() + "', "
+                    + "'" + note.getMonth() + "', "
+                    + "'" + note.getYear() + "');");
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(controller, ex, "Ошибка базы данных!");
+        }
     }
 
     public void removeNote(Note note) {
-        template.execute("DELETE FROM product WHERE id=" + note.getId() + ";");
+        try {
+            template.execute("DELETE FROM product WHERE id=" + note.getId() + ";");
+        } catch (Exception ex) {
+            DefaultExceptionHandler.handleException(controller, ex, "Ошибка базы данных!");
+        }
     }
 
     public String readTextFromFile(String fileName) {
@@ -236,27 +273,59 @@ public class Model {
     }
 
     private void initDataBase() {
-        template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                "itemTitle TEXT, typeID INTEGER, price REAL, count REAL, countTypeID INTEGER, shopID INTEGER, " +
-                "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
-                "month TEXT, year TEXT);");
+        try {
+            template.execute("CREATE TABLE IF NOT EXISTS application (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT);");
 
-        template.execute("CREATE TABLE IF NOT EXISTS item_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT);");
-        template.execute("INSERT OR REPLACE INTO item_types (id, title) VALUES (0, 'Прочее')");
+            try {
+                template.execute("INSERT OR REPLACE INTO application (id, version) VALUES (0, '" + applicationVersion + "');");
+            } catch (Exception ex) {
+                int count = template.queryForObject("SELECT COUNT(id) from application", Integer.class);
+                if (count == 1) {
+                    String version = template.queryForObject("SELECT version from application", String.class);
+                    if (!applicationVersion.equals(version)) {
+                        updateDataBase();
+                    }
+                } else {
+                    throw new RuntimeException("Undefined database version");
+                }
+            }
 
-        template.execute("CREATE TABLE IF NOT EXISTS count_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT);");
-        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (0, 'шт.')");
-        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (1, 'кг.')");
-        template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (2, 'л.')");
+            template.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT , " +
+                    "itemTitle TEXT, typeID INTEGER, price REAL, count REAL, countTypeID INTEGER, shopID INTEGER, " +
+                    "necessityID INTEGER, qualityID INTEGER, bySale INTEGER, day TEXT," +
+                    "month TEXT, year TEXT);");
 
-        template.execute("CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT);");
-        template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее')");
+            template.execute("CREATE TABLE IF NOT EXISTS item_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "title TEXT);");
+            template.execute("INSERT OR REPLACE INTO item_types (id, title) VALUES (0, 'Прочее');");
 
-        template.execute("CREATE TABLE IF NOT EXISTS application (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT)");
-        template.execute("INSERT OR REPLACE INTO application (id, version) VALUES (0, '" + applicationVersion + "')");
+            template.execute("CREATE TABLE IF NOT EXISTS count_types (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "title TEXT);");
+            template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (0, 'шт.');");
+            template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (1, 'кг.');");
+            template.execute("INSERT OR REPLACE INTO count_types (id, title) VALUES (2, 'л.');");
+
+            template.execute("CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "title TEXT);");
+            template.execute("INSERT OR REPLACE INTO shops (id, title) VALUES (0, 'Прочее');");
+        } catch (Exception ex) {
+            throw new RuntimeException("Database exception", ex);
+        }
+
+    }
+
+    private void updateDataBase() {
+
+    }
+
+    private void inspectDatabase(){
+        try {
+            template.execute("DELETE FROM product WHERE itemTitle LIKE '';");
+            template.execute("DELETE FROM shops WHERE id NOT IN (SELECT shopID FROM product) AND id > 0;");
+            template.execute("DELETE FROM item_types WHERE id NOT IN (SELECT typeID FROM product) AND id > 0;");
+        }catch (Exception ex){
+            DefaultExceptionHandler.handleException(ex);
+        }
     }
 
     private void loadUserSettings() {
@@ -361,7 +430,7 @@ public class Model {
                 }
             });
         } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
+            DefaultExceptionHandler.handleException(controller, ex, "Ошибка базы данных!");
         }
 
         if (selectedSortType >= 0 && selectedSortType < comparators.length) {
@@ -453,7 +522,7 @@ public class Model {
     }
 
     public Set<String> getItemsSet() {
-        List<String> result;
+        List<String> result = new ArrayList<>();
         try {
             result = template.query("SELECT itemTitle FROM product;", new RowMapper<String>() {
                 @Override
@@ -463,7 +532,6 @@ public class Model {
             });
         } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
-            result = new ArrayList<>();
         }
 
         return new TreeSet<>(result);

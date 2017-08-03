@@ -175,8 +175,8 @@ public class Controller {
         return new TotalCalcTextFieldFocusListener(priceTextField, countTextField);
     }
 
-    public SelectAllTextMouseListener getSelectAllTextMouseListener(JTextField textField) {
-        return new SelectAllTextMouseListener(textField);
+    public SelectAllTextFocusListener getSelectAllTextFocusListener() {
+        return new SelectAllTextFocusListener();
     }
 
     public CountTypeComboBoxItemListener getCountTypeComboBoxItemListener(JLabel label) {
@@ -286,8 +286,8 @@ public class Controller {
         return result;
     }
 
-    public void showErrorMessage(Throwable ex) {
-        JOptionPane.showMessageDialog(view, "ОШИБКА: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+    public void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(view, "ОШИБКА: " + message, "Ошибка", JOptionPane.ERROR_MESSAGE);
     }
 
     public int getDataViewID() {
@@ -735,60 +735,43 @@ public class Controller {
                 return;
             }
 
+            JTextField totalTextField = (JTextField) e.getSource();
+
+
             float price;
             float count;
+            float total;
 
             try {
                 price = Float.parseFloat(priceTextField.getText());
                 count = Float.parseFloat(countTextField.getText());
+                total = Float.parseFloat(totalTextField.getText());
             } catch (Exception ex) {
                 DefaultExceptionHandler.handleException(ex);
                 return;
             }
 
-            JTextField totalTextField = (JTextField) e.getSource();
-
             if (price == 0f && count > 0f) {
-                try {
-                    float total = Float.parseFloat(totalTextField.getText());
-                    priceTextField.setText(String.format(Note.PRICE_FORMAT, total / count));
-                } catch (Exception ex) {
-                    DefaultExceptionHandler.handleException(ex);
-                }
+                priceTextField.setText(String.format(Note.PRICE_FORMAT, total / count));
+            }
+
+            if (price > 0f && count == 0f){
+                countTextField.setText(String.format(Note.COUNT_FORMAT, total / price));
             }
 
         }
     }
 
-    private class SelectAllTextMouseListener implements MouseListener {
-        private JTextField textField;
-
-        SelectAllTextMouseListener(JTextField textField) {
-            this.textField = textField;
+    private class SelectAllTextFocusListener implements FocusListener {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField) {
+                ((JTextField) e.getSource()).selectAll();
+            }
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
-            textField.selectAll();
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
+        public void focusLost(FocusEvent e) {
 
         }
     }
@@ -816,7 +799,7 @@ public class Controller {
             this.table = table;
         }
 
-        @SuppressWarnings({"unchecked"})
+        @SuppressWarnings("unchecked")
         @Override
         public void itemStateChanged(ItemEvent e) {
             if (!(e.getSource() instanceof JComboBox)) {
@@ -839,9 +822,11 @@ public class Controller {
             }
 
             String newValue = JOptionPane.showInputDialog(dialog, "Введите новое значение:", "", JOptionPane.PLAIN_MESSAGE);
-            if (newValue != null) {
+            if (newValue != null && !newValue.isEmpty()) {
                 int id = insertNewValue(newValue, table);
-                cb.insertItemAt(new SimpleData(id, newValue), 0);
+                if (id >= 0){
+                    cb.insertItemAt(new SimpleData(id, newValue), 0);
+                }
             }
             cb.setSelectedIndex(0);
         }

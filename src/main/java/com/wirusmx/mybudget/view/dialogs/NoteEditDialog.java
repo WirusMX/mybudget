@@ -154,8 +154,8 @@ public class NoteEditDialog extends JDialog {
         add(label3);
 
         JTextField itemPriceTextField = new JTextField("" + note.getPriceAsString());
+        itemPriceTextField.addFocusListener(controller.getSelectAllTextFocusListener());
         itemPriceTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f), 2));
-        itemPriceTextField.addMouseListener(controller.getSelectAllTextMouseListener(itemPriceTextField));
         itemPriceTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
         itemPriceTextField.setToolTipText("Укажите цену за одну единицу (шт., кг., и т.п.) товара.");
         add(itemPriceTextField);
@@ -165,8 +165,8 @@ public class NoteEditDialog extends JDialog {
         add(countLabel);
 
         JTextField itemsCountTextField = new JTextField("" + note.getCountAsString());
+        itemsCountTextField.addFocusListener(controller.getSelectAllTextFocusListener());
         itemsCountTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.COUNT_FORMAT, 0f), 3));
-        itemsCountTextField.addMouseListener(controller.getSelectAllTextMouseListener(itemsCountTextField));
         itemsCountTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine, secondColElementWidth - 70, ELEMENT_HEIGHT);
         itemsCountTextField.setToolTipText("Укажите количество купленного товара.");
         add(itemsCountTextField);
@@ -184,9 +184,9 @@ public class NoteEditDialog extends JDialog {
         add(totalLabel);
 
         JTextField totalTextField = new JTextField("" + note.getTotalAsString());
+        totalTextField.addFocusListener(controller.getSelectAllTextFocusListener());
         totalTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Float.class, String.format(Note.PRICE_FORMAT, 0f), 2));
         totalTextField.addFocusListener(controller.getTotalCalcTextFieldFocusListener(itemPriceTextField, itemsCountTextField));
-        totalTextField.addMouseListener(controller.getSelectAllTextMouseListener(totalTextField));
         totalTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine++, secondColElementWidth, ELEMENT_HEIGHT);
         totalTextField.setToolTipText("Значение будет вычислено автоматически, если заполены предыдущие поля (цена и количество).");
         add(totalTextField);
@@ -241,22 +241,22 @@ public class NoteEditDialog extends JDialog {
         add(label7);
 
         JTextField dayTextField = new JTextField(note.getDay());
+        dayTextField.addFocusListener(controller.getSelectAllTextFocusListener());
         dayTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getDay(), 0));
-        dayTextField.addMouseListener(controller.getSelectAllTextMouseListener(dayTextField));
         dayTextField.setBounds(SECOND_COL_X_POS, Y0 + DELTA_Y * elementsLine, 30, ELEMENT_HEIGHT);
         dayTextField.setToolTipText("День");
         add(dayTextField);
 
         JTextField monthTextField = new JTextField(note.getMonth());
+        monthTextField.addFocusListener(controller.getSelectAllTextFocusListener());
         monthTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getMonth(), 0));
-        monthTextField.addMouseListener(controller.getSelectAllTextMouseListener(monthTextField));
         monthTextField.setBounds(SECOND_COL_X_POS + 35, Y0 + DELTA_Y * elementsLine, 30, ELEMENT_HEIGHT);
         monthTextField.setToolTipText("Месяц");
         add(monthTextField);
 
         JTextField yearTextField = new JTextField(note.getYear());
+        yearTextField.addFocusListener(controller.getSelectAllTextFocusListener());
         yearTextField.addFocusListener(controller.getNumericTextFieldFocusListener(Integer.class, note.getYear(), 0));
-        yearTextField.addMouseListener(controller.getSelectAllTextMouseListener(yearTextField));
         yearTextField.setBounds(SECOND_COL_X_POS + 70, Y0 + DELTA_Y * elementsLine, 60, ELEMENT_HEIGHT);
         yearTextField.setToolTipText("Год");
         add(yearTextField);

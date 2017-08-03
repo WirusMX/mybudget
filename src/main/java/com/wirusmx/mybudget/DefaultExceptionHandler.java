@@ -31,16 +31,24 @@ public class DefaultExceptionHandler {
     }
 
     public static void handleException(Throwable ex){
-        handleException(null, ex);
+        handleException(null, ex, "");
     }
 
     public static void handleException(Controller controller, Throwable ex){
+        handleException(controller, ex, "");
+    }
+
+    public static void handleException(Controller controller, Throwable ex, String userMessage){
         if (isLoggerReady){
             logger.error(ex.getMessage(), ex);
         }
 
         if (controller != null) {
-            controller.showErrorMessage(ex);
+            if (userMessage.isEmpty()) {
+                controller.showErrorMessage(ex.getMessage());
+            } else {
+                controller.showErrorMessage(userMessage);
+            }
         }
     }
 }
