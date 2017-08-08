@@ -3,6 +3,7 @@ package com.wirusmx.mybudget.model;
 import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.controller.Controller;
 import com.wirusmx.mybudget.model.comparators.*;
+import com.wirusmx.mybudget.model.exceptions.UndefinedDatabaseVersionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -94,12 +95,42 @@ public class Model {
         this.searchQuery = searchQuery;
     }
 
+    /**
+     * Method initializes and inspects database, loads user settings from *.properties file,
+     * initializes comparators, which are used for sorting Notes. <br>
+     * <br>
+     * It is recommended to use <code>init(false) in test scope.
+     *
+     * @see MyComparator
+     * @see #initDataBase()
+     * @see #inspectDatabase()
+     */
     public void init() {
+        init(true);
+    }
+
+    /**
+     * Method initializes and inspects database, loads user settings from *.properties file
+     * or sets default values (depends on loadUserSettings parameter),
+     * initializes comparators, which are used for sorting Notes. <br>
+     * It is recommended to use this method with <code>loadUserSettings = false</code>
+     * in test scope.
+     *
+     * @param loadUserSettings if parameter is <code>true</code>,then user settings
+     *                         will be loaded from *.properties file,
+     *                         otherwise user settings will have default values.
+     * @see MyComparator
+     * @see #initDataBase()
+     * @see #inspectDatabase()
+     */
+    void init(boolean loadUserSettings) {
         initDataBase();
 
         inspectDatabase();
 
-        loadUserSettings();
+        if (loadUserSettings) {
+            loadUserSettings();
+        }
 
         comparators = new MyComparator[]{
                 new DateComparator(selectedSortOrder),
@@ -111,6 +142,13 @@ public class Model {
         };
     }
 
+    /**
+     * Extracts pares of (id, title) from <code>table</code>.
+     *
+     * @param tableName name of table which contains values for ComboBox.
+     * @return ComboBox values set with the default order.
+     * @see ComboBoxValuesComparator
+     */
     public Set<SimpleData> getComboBoxValues(String tableName) {
         Set<SimpleData> values = new TreeSet<>(new ComboBoxValuesComparator());
 
@@ -130,7 +168,7 @@ public class Model {
     }
 
     /**
-     * Insert new combo box value to database.
+     * Insert new ComboBox value to database.
      *
      * @param value - value for inserting;
      * @param table - table for inserting.
@@ -149,10 +187,15 @@ public class Model {
         return result;
     }
 
+    /**
+     * Insert new Note to database.
+     *
+     * @param note Note for insertion.
+     * @throws RuntimeException if Note.itemTitle is empty.
+     */
     public void insertNote(Note note) {
-
         try {
-            if (note.getItemTitle().isEmpty()){
+            if (note.getItemTitle().isEmpty()) {
                 throw new RuntimeException("Empty item title");
             }
 
@@ -176,17 +219,37 @@ public class Model {
         }
     }
 
+    /**
+     * Extracts Notes from database which matches the specified period.
+     *
+     * @param selectedPeriodType type of period;
+     * @param selectedPeriod     sample period.
+     * @return List of Notes which matches the specified period, without
+     * sorting.
+     */
     public List<Note> getNotes(int selectedPeriodType, String selectedPeriod) {
-        return getNotes(selectedPeriodType, selectedPeriod, -1, "");
+        return getNotes(selectedPeriodType, selectedPeriod, SortType.UNDEFINED, "");
     }
 
+    /**
+     * Extracts Notes from database which matches the previously
+     * specified period and search query.
+     *
+     * @return List of Notes which matches the specified period and
+     * search query, sorted by previously specified way.
+     */
     public List<Note> getNotes() {
         return getNotes(selectedPeriodType, selectedPeriod, selectedSortType, searchQuery);
     }
 
+    /**
+     * Updates Note in database.
+     *
+     * @param note Note for updating.
+     */
     public void updateNote(Note note) {
         try {
-            template.execute("INSERT OR REPLACE INTO product (id, itemTitle, typeID, price, count, countTypeID, shopID, " +
+            template.execute("ERT OR REPLACE INTO product (id, itemTitle, typeID, price, count, countTypeID, shopID, " +
                     "necessityID, qualityID, bySale, day, month, year) " +
                     "VALUES ("
                     + note.getId() + ", "
@@ -207,6 +270,11 @@ public class Model {
         }
     }
 
+    /**
+     * Removes Note from database.
+     *
+     * @param note Note for removing.
+     */
     public void removeNote(Note note) {
         try {
             template.execute("DELETE FROM product WHERE id=" + note.getId() + ";");
@@ -215,13 +283,19 @@ public class Model {
         }
     }
 
-    public String readTextFromFile(String fileName) {
+    /**
+     * Reads UTF-8 text from the resource file.
+     *
+     * @param fileName resource file.
+     * @return text from the resource file.
+     */
+    public String readTextFromResourceFile(String fileName) {
         String result = "";
 
-        try (BufferedReader reader
-                     = new BufferedReader(
+        try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(
-                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName), "UTF-8"))) {
+                        getClass().getResourceAsStream(TEXT_FILES_PREFIX + fileName), "UTF-8"))
+        ) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result += line + "\n";
@@ -232,7 +306,13 @@ public class Model {
         return result;
     }
 
-    public ImageIcon getImage(String fileName) {
+    /**
+     * Loads resource image in PNG format.
+     *
+     * @param fileName image file name.
+     * @return image or <code>null</code> if any problems happens.
+     */
+    public ImageIcon getResourceImage(String fileName) {
         ImageIcon image = null;
 
         try {
@@ -243,6 +323,27 @@ public class Model {
         return image;
     }
 
+    /**
+     * Extracts periods of previously specified type from data base.
+     *
+     * @return set of periods.
+     * @see #getYears()
+     * @see #getMonths()
+     * @see #getDays()
+     */
+    public Set<String> getPeriods() {
+        return getPeriods(selectedPeriodType);
+    }
+
+    /**
+     * Extracts periods of specified type from data base.
+     *
+     * @param selectedPeriodType type of period.
+     * @return set of periods.
+     * @see #getYears()
+     * @see #getMonths()
+     * @see #getDays()
+     */
     public Set<String> getPeriods(int selectedPeriodType) {
         switch (selectedPeriodType) {
             case PeriodType.YEAR:
@@ -252,17 +353,23 @@ public class Model {
             case PeriodType.DAY:
                 return getDays();
         }
-
         return new TreeSet<>();
     }
 
-    public Set<String> getPeriods() {
-        return getPeriods(selectedPeriodType);
-    }
-
-    public String stringToNumericFormat(Class type, String value, int cutNum) {
+    /**
+     * Converts string value to true numeric format string.
+     *
+     * @param type                type of resulted value. Must
+     *                            be {@link Integer} or {@link Float};
+     * @param value               string value for converting;
+     * @param decimalNumbersCount count of numbers after decimal point.
+     * @return converted value or empty string if type not allowed.
+     * @see #stringToIntegerFormat(String)
+     * @see #stringToFloatFormat(String, int)
+     */
+    public String stringToNumericFormat(Class type, String value, int decimalNumbersCount) {
         if (type.equals(Float.class)) {
-            return stringToFloatFormat(value, cutNum);
+            return stringToFloatFormat(value, decimalNumbersCount);
         }
 
         if (type.equals(Integer.class)) {
@@ -272,6 +379,13 @@ public class Model {
         return "";
     }
 
+    /**
+     * Creates database tables and inserts default values.
+     *
+     * @throws UndefinedDatabaseVersionException if method is unable
+     *                                           to define database version;
+     * @throws RuntimeException                  if any problems happens.
+     */
     private void initDataBase() {
         try {
             template.execute("CREATE TABLE IF NOT EXISTS application (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT);");
@@ -283,10 +397,10 @@ public class Model {
                 if (count == 1) {
                     String version = template.queryForObject("SELECT version from application", String.class);
                     if (!applicationVersion.equals(version)) {
-                        updateDataBase();
+                        updateDataBaseVersion();
                     }
                 } else {
-                    throw new RuntimeException("Undefined database version");
+                    throw new UndefinedDatabaseVersionException("Unable to define database version");
                 }
             }
 
@@ -314,20 +428,26 @@ public class Model {
 
     }
 
-    private void updateDataBase() {
+    private void updateDataBaseVersion() {
 
     }
 
-    private void inspectDatabase(){
+    /**
+     * Removes rows from database tables, which contains unused or empty values.
+     */
+    private void inspectDatabase() {
         try {
             template.execute("DELETE FROM product WHERE itemTitle LIKE '';");
             template.execute("DELETE FROM shops WHERE id NOT IN (SELECT shopID FROM product) AND id > 0;");
             template.execute("DELETE FROM item_types WHERE id NOT IN (SELECT typeID FROM product) AND id > 0;");
-        }catch (Exception ex){
+        } catch (Exception ex) {
             DefaultExceptionHandler.handleException(ex);
         }
     }
 
+    /**
+     * Loads user settings from *.properties file.
+     */
     private void loadUserSettings() {
         userSettings = new Properties();
         if (new File(USER_SETTINGS_PROPERTIES_PATH).exists()) {
@@ -537,6 +657,10 @@ public class Model {
         return new TreeSet<>(result);
     }
 
+    /**
+     * Compare two {@link SimpleData} values. Value with <code>id = 0</code>
+     * is less then others. If values <code>id != 0</code>, they compare by title.
+     */
     private class ComboBoxValuesComparator implements Comparator<SimpleData> {
         @Override
         public int compare(SimpleData o1, SimpleData o2) {
@@ -552,7 +676,6 @@ public class Model {
         }
     }
 
-
     public static class PeriodType {
         public static final int ALL = 0;
         public static final int YEAR = 1;
@@ -561,6 +684,7 @@ public class Model {
     }
 
     public static class SortType {
+        public static final int UNDEFINED = -1;
         public static final int DATE = 0;
         public static final int ITEM = 1;
         public static final int TYPE = 2;

@@ -36,7 +36,6 @@ public class ModelTest extends Assert {
                 "1234")
         );
 
-
         list.add(new Note(2,
                 "ItemForTest",
                 new SimpleData(0, "TestType"),
@@ -86,7 +85,7 @@ public class ModelTest extends Assert {
         when(template.query(anyString(), any(RowMapper.class))).thenReturn(list);
 
         Model model = new Model(null, template, "");
-        model.init();
+        model.init(false);
         model.setSelectedSortOrder(MyComparator.DIRECT_ORDER);
         List<Note> notes = model.getNotes(Model.PeriodType.DAY, "1234.02.01", Model.SortType.ITEM, "item");
 

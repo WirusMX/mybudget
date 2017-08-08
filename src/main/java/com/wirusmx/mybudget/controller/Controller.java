@@ -263,7 +263,7 @@ public class Controller {
     }
 
     public ImageIcon getImage(String fileName) {
-        return model.getImage(fileName);
+        return model.getResourceImage(fileName);
     }
 
     public float[][] getStatistics(int periodType, String period, int itemType) {
@@ -439,7 +439,7 @@ public class Controller {
     private class AboutButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            JLabel messageLabel = new JLabel(model.readTextFromFile("about.txt"));
+            JLabel messageLabel = new JLabel(model.readTextFromResourceFile("about.txt"));
             messageLabel.setFont(new Font("Monospased", Font.PLAIN, 14));
             JOptionPane.showMessageDialog(view,
                     messageLabel,
@@ -450,7 +450,7 @@ public class Controller {
     private class UsingRulesButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            JLabel messageLabel = new JLabel(model.readTextFromFile("using_rules.txt"));
+            JLabel messageLabel = new JLabel(model.readTextFromResourceFile("using_rules.txt"));
             messageLabel.setFont(new Font("Monospased", Font.PLAIN, 12));
             JScrollPane scrollPane = new JScrollPane(messageLabel);
             scrollPane.setPreferredSize(new Dimension(600, 500));

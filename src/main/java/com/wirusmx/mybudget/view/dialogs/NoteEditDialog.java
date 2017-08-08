@@ -50,7 +50,7 @@ public class NoteEditDialog extends JDialog {
     private final Controller controller;
     private Note note;
 
-    private int dialogResult;
+    private int dialogResult = JOptionPane.NO_OPTION;
 
     /**
      * Constructs dialog for entering new item data.
