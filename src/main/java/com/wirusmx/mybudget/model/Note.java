@@ -56,9 +56,9 @@ public class Note {
     /**
      * Constructs new <code>Note</code> with the specific values.
      */
-    Note(int id, String itemTitle, SimpleData type, float price, float count, SimpleData countType,
-         SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
-         String day, String month, String year) {
+    public Note(int id, String itemTitle, SimpleData type, float price, float count, SimpleData countType,
+                SimpleData shop, SimpleData necessity, SimpleData quality, boolean bySale,
+                String day, String month, String year) {
         this.id = id;
         this.itemTitle = itemTitle;
         this.type = type;
@@ -74,7 +74,7 @@ public class Note {
         this.year = year;
     }
 
-    int getId() {
+    public int getId() {
         return id;
     }
 

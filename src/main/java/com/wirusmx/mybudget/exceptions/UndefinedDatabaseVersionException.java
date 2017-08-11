@@ -1,4 +1,4 @@
-package com.wirusmx.mybudget.model.exceptions;
+package com.wirusmx.mybudget.exceptions;
 
 /**
  * @author Piunov M (aka WirusMX)

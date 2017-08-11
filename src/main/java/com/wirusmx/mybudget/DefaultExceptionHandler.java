@@ -1,6 +1,6 @@
 package com.wirusmx.mybudget;
 
-import com.wirusmx.mybudget.controller.Controller;
+import com.wirusmx.mybudget.controller.MainController;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -34,11 +34,11 @@ public class DefaultExceptionHandler {
         handleException(null, ex, "");
     }
 
-    public static void handleException(Controller controller, Throwable ex){
+    public static void handleException(MainController controller, Throwable ex){
         handleException(controller, ex, "");
     }
 
-    public static void handleException(Controller controller, Throwable ex, String userMessage){
+    public static void handleException(MainController controller, Throwable ex, String userMessage){
         if (isLoggerReady){
             logger.error(ex.getMessage(), ex);
         }

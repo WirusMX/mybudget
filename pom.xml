@@ -82,6 +82,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.txt</include>
+                    <include>**/*.properties</include>
                 </includes>
             </resource>
             <resource>

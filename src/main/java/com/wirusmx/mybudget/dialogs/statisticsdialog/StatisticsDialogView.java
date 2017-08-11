@@ -1,6 +1,6 @@
-package com.wirusmx.mybudget.view.dialogs;
+package com.wirusmx.mybudget.dialogs.statisticsdialog;
 
-import com.wirusmx.mybudget.controller.Controller;
+import com.wirusmx.mybudget.managers.ResourcesManager;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.SimpleData;
 
@@ -15,8 +15,9 @@ import java.util.Set;
  *
  * @author Piunov M (aka WirusMX)
  */
-public class StatisticsDialog extends JDialog {
-    private Controller controller;
+class StatisticsDialogView extends JDialog {
+    private StatisticsDialogController controller;
+    private ResourcesManager resourcesManager;
 
     private JPanel graphPanel;
     private DefaultTableModel tableModel;
@@ -25,26 +26,26 @@ public class StatisticsDialog extends JDialog {
     private String selectedPeriod;
     private int selectedItemType;
 
-    public StatisticsDialog(Controller controller) {
+    StatisticsDialogView(StatisticsDialogController controller, ResourcesManager resourcesManager) {
         this.controller = controller;
-        init();
+        this.resourcesManager = resourcesManager;
     }
 
-    public void setSelectedPeriod(String selectedPeriod) {
+    void setSelectedPeriod(String selectedPeriod) {
         this.selectedPeriod = selectedPeriod;
     }
 
-    public void setSelectedItemType(int selectedItemType) {
+    void setSelectedItemType(int selectedItemType) {
         this.selectedItemType = selectedItemType;
     }
 
-    private void init() {
+    void init() {
         setSize(1000, 600);
         setModal(true);
         setLocationRelativeTo(null);
-        setIconImage(controller.getImage("stat").getImage());
+        setIconImage(resourcesManager.getImage("stat").getImage());
         getRootPane().registerKeyboardAction(
-                controller.getCloseStatisticsDialogButtonActionListener(this),
+                controller.getCloseStatisticsDialogButtonActionListener(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_IN_FOCUSED_WINDOW
         );
@@ -61,7 +62,7 @@ public class StatisticsDialog extends JDialog {
         for (SimpleData sd : itemTypes) {
             itemTypeComboBox.addItem(sd);
         }
-        itemTypeComboBox.addItemListener(controller.getStatisticsDialogItemTypeComboBoxItemListener(this));
+        itemTypeComboBox.addItemListener(controller.getStatisticsDialogItemTypeComboBoxItemListener());
         controlPanel.add(itemTypeComboBox);
 
         selectedItemType = -1;
@@ -73,7 +74,7 @@ public class StatisticsDialog extends JDialog {
         for (String p : periods) {
             periodComboBox.addItem(p);
         }
-        periodComboBox.addItemListener(controller.getStatisticsDialogPeriodComboBoxItemListener(this));
+        periodComboBox.addItemListener(controller.getStatisticsDialogPeriodComboBoxItemListener());
 
         selectedPeriod = (String) periodComboBox.getSelectedItem();
 
@@ -117,7 +118,7 @@ public class StatisticsDialog extends JDialog {
 
     }
 
-    public void update() {
+    void update() {
         if (selectedPeriod.isEmpty()) {
             return;
         }
@@ -275,4 +276,6 @@ public class StatisticsDialog extends JDialog {
             }
         }
     }
+
+
 }

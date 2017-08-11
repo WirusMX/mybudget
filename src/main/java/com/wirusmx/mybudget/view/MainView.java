@@ -1,7 +1,8 @@
 package com.wirusmx.mybudget.view;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
-import com.wirusmx.mybudget.controller.Controller;
+import com.wirusmx.mybudget.controller.MainController;
+import com.wirusmx.mybudget.managers.ResourcesManager;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
@@ -22,10 +23,9 @@ import java.util.Set;
  *
  * @author Piunov M (aka WirusMX)
  */
-public class View extends JFrame {
-    private Controller controller;
-    private String applicationTitle;
-    private String applicationVersion;
+public class MainView extends JFrame {
+    private MainController controller;
+    private ResourcesManager resourcesManager;
 
     private Class[] dataViews;
 
@@ -33,23 +33,22 @@ public class View extends JFrame {
     private JLabel statLabel = new JLabel();
     private JPanel centerPanel;
 
-    public View(Controller controller, String applicationTitle, String applicationVersion) {
+    public MainView(MainController controller, ResourcesManager resourcesManager) {
         this.controller = controller;
-        this.applicationTitle = applicationTitle;
-        this.applicationVersion = applicationVersion;
+        this.resourcesManager = resourcesManager;
         dataViews = new Class[]{ListView.class, TableView.class};
     }
 
     public void init() {
-
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
 
         }
 
-        setTitle(applicationTitle + " v." + applicationVersion);
-        setIconImage(controller.getImage("favicon").getImage());
+        setTitle(resourcesManager.getProperty("application.title")
+                + " v." + resourcesManager.getProperty("application.version"));
+        setIconImage(resourcesManager.getImage("favicon").getImage());
         setBounds(0, 0, 1024, 600);
         setMinimumSize(new Dimension(900, 300));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -96,6 +95,26 @@ public class View extends JFrame {
         statLabel.setText("Итого: " + String.format(Note.PRICE_FORMAT, total) + " руб., из них "
                 + String.format(Note.PRICE_FORMAT, totalByNecessity[0]) + " руб. на товары высокой необходимости, "
                 + String.format(Note.PRICE_FORMAT, totalByNecessity[1]) + " руб. - низкой необходимости");
+    }
+
+    public void showAboutDialog(){
+        JLabel messageLabel = new JLabel(resourcesManager.getText("about"));
+        messageLabel.setFont(new Font("Monospased", Font.PLAIN, 14));
+        JOptionPane.showMessageDialog(this,
+                messageLabel,
+                "О программе", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public void showUsingRulesDialog(){
+        JLabel messageLabel = new JLabel(resourcesManager.getText("using_rules"));
+        messageLabel.setFont(new Font("Monospased", Font.PLAIN, 12));
+        JScrollPane scrollPane = new JScrollPane(messageLabel);
+        scrollPane.setPreferredSize(new Dimension(600, 500));
+
+        JOptionPane.showMessageDialog(this,
+                scrollPane,
+                "Правила пользования ПО",
+                JOptionPane.PLAIN_MESSAGE);
     }
 
     public void setDataView(Class<DataView> dataView) {
@@ -346,7 +365,7 @@ public class View extends JFrame {
         }
         menuItem.addActionListener(actionListener);
         if (imageName != null) {
-            menuItem.setIcon(controller.getImage(imageName));
+            menuItem.setIcon(resourcesManager.getImage(imageName));
         }
         return menuItem;
     }
