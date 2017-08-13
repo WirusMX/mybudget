@@ -83,28 +83,8 @@ public class Model {
         this.searchQuery = searchQuery;
     }
 
-    /**
-     * Method initializes and inspects database, loads user settings from *.properties file,
-     * initializes comparators, which are used for sorting Notes. <br>
-     * <br>
-     * It is recommended to use <code>init(false) in test scope.
-     *
-     * @see MyComparator
-     */
     public void init() {
-        init(true);
-    }
-
-    /**
-     * @param loadUserSettings if parameter is <code>true</code>,then user settings
-     *                         will be loaded from *.properties file,
-     *                         otherwise user settings will have default values.
-     * @see MyComparator
-     */
-    void init(boolean loadUserSettings) {
-        if (loadUserSettings) {
-            loadUserSettings();
-        }
+        loadUserSettings();
 
         comparators = new MyComparator[]{
                 new DateComparator(selectedSortOrder),
@@ -142,7 +122,7 @@ public class Model {
      * @param selectedPeriodType type of period.
      * @return set of periods.
      */
-    Set<String> getPeriods(int selectedPeriodType) {
+    private Set<String> getPeriods(int selectedPeriodType) {
         switch (selectedPeriodType) {
             case PeriodType.YEAR:
                 return getYears();
@@ -166,7 +146,7 @@ public class Model {
     }
 
     @SuppressWarnings("unchecked")
-    List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery) {
+    private List<Note> getNotes(int selectedPeriodType, String selectedPeriod, int selectedSortType, String searchQuery) {
         List<Note> result = new ArrayList<>();
 
         try {
@@ -193,26 +173,6 @@ public class Model {
         }
 
         return result;
-    }
-
-    /**
-     * Extracts pares of (id, title) from <code>table</code>.
-     *
-     * @param tableName name of table which contains values for ComboBox.
-     * @return ComboBox values set with the default order.
-     * @see Model.ComboBoxValuesComparator
-     */
-    Set<SimpleData> getComboBoxValues(String tableName) {
-        Set<SimpleData> values = new TreeSet<>(new ComboBoxValuesComparator());
-
-        try {
-            List<SimpleData> temp = databaseManager.getComboBoxValues(tableName);
-            values.addAll(temp);
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-
-        return values;
     }
 
     /**
@@ -294,25 +254,6 @@ public class Model {
         return new TreeSet<>(temp).descendingSet();
     }
 
-    /**
-     * Compare two {@link SimpleData} values. Value with <code>id = 0</code>
-     * is less then others. If values <code>id != 0</code>, they compare by title.
-     */
-    private static class ComboBoxValuesComparator implements Comparator<SimpleData> {
-        @Override
-        public int compare(SimpleData o1, SimpleData o2) {
-            if (o1.getId() == 0) {
-                return -1;
-            }
-
-            if (o2.getId() == 0) {
-                return 1;
-            }
-
-            return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
-        }
-    }
-
     public static class PeriodType {
         public static final int ALL = 0;
         public static final int YEAR = 1;
@@ -320,6 +261,7 @@ public class Model {
         public static final int DAY = 3;
     }
 
+    @SuppressWarnings("unused")
     public static class SortType {
         public static final int UNDEFINED = -1;
         public static final int DATE = 0;

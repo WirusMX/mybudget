@@ -179,6 +179,15 @@ public class MainView extends JFrame {
 
         fileMenu.add(
                 createMenuItem(
+                        "Дублировать",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK),
+                        controller.getDuplicateNoteActionListener(currentDataView),
+                        "duplicate"
+                )
+        );
+
+        fileMenu.add(
+                createMenuItem(
                         "Удалить запись",
                         KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
                         controller.getRemoveNoteButtonActionListener(currentDataView),
@@ -231,8 +240,9 @@ public class MainView extends JFrame {
                         "stat"
                 )
         );
-
+/*
         toolsMenu.addSeparator();
+
 
         toolsMenu.add(
                 createMenuItem(
@@ -242,7 +252,7 @@ public class MainView extends JFrame {
                         "settings"
                 )
         );
-
+*/
         menuBar.add(toolsMenu);
 
         JMenu infoMenu = new JMenu("Справка");
@@ -343,6 +353,15 @@ public class MainView extends JFrame {
                         KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
                         controller.getEditNoteActionListener(currentDataView),
                         "edit"
+                )
+        );
+
+        popupMenu.add(
+                createMenuItem(
+                        "Дублировать",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK),
+                        controller.getDuplicateNoteActionListener(currentDataView),
+                        "duplicate"
                 )
         );
 

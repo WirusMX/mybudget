@@ -35,7 +35,7 @@ class StatisticsDialogModel {
      *
      * @param tableName name of table which contains values for ComboBox.
      * @return ComboBox values set with the default order.
-     * @see Model.ComboBoxValuesComparator
+     * @see ComboBoxValuesComparator
      */
     Set<SimpleData> getComboBoxValues(String tableName) {
         Set<SimpleData> values = new TreeSet<>(new ComboBoxValuesComparator());

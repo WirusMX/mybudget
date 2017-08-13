@@ -90,6 +90,7 @@ public class MainController {
         return statisticsButtonActionListener;
     }
 
+    @SuppressWarnings("unused")
     public SettingsButtonActionListener getSettingsButtonActionListener() {
         if (settingsButtonActionListener == null) {
             settingsButtonActionListener = new SettingsButtonActionListener();
@@ -153,8 +154,6 @@ public class MainController {
         return resetButtonActionListener;
     }
 
-
-
     public int getSelectedPeriodType() {
         return model.getSelectedPeriodType();
     }
@@ -183,6 +182,10 @@ public class MainController {
         return model.getDataViewID();
     }
 
+    public DuplicateNoteActionListener getDuplicateNoteActionListener(DataView currentDataView) {
+        return new DuplicateNoteActionListener(currentDataView);
+    }
+
     private class AddNewNoteButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -195,6 +198,30 @@ public class MainController {
                 mainView.update();
             }
 
+        }
+    }
+
+    private class DuplicateNoteActionListener implements ActionListener {
+        private DataView dataView;
+
+        DuplicateNoteActionListener(DataView dataView) {
+            this.dataView = dataView;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Note note = dataView.getSelectedValue();
+            if (note == null) {
+                return;
+            }
+
+            NoteEditDialog noteEditDialog = new NoteEditDialog(note);
+
+            note = noteEditDialog.getNote();
+            if (noteEditDialog.getDialogResult() == JOptionPane.YES_OPTION && note != null) {
+                model.insertNote(note);
+                mainView.update();
+            }
         }
     }
 
