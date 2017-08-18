@@ -10,6 +10,9 @@ import com.wirusmx.mybudget.view.MainView;
 import com.wirusmx.mybudget.view.dataviews.DataView;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +45,8 @@ public class MainController {
         return model.getNotes();
     }
 
+    private EditMenuListener editMenuListener = null;
+    private ViewMenuListener viewMenuListener = null;
     private AddNewNoteButtonActionListener addNewNoteButtonActionListener = null;
     private ExitButtonButtonActionListener exitButtonButtonActionListener = null;
     private StatisticsButtonActionListener statisticsButtonActionListener = null;
@@ -54,6 +59,22 @@ public class MainController {
     private SortOrderComboBoxItemListener sortOrderComboBoxItemListener = null;
     private SearchButtonActionListener searchButtonActionListener = null;
     private ResetButtonActionListener resetButtonActionListener = null;
+
+    public EditMenuListener getEditMenuListener() {
+        if (editMenuListener == null) {
+            editMenuListener = new EditMenuListener();
+        }
+
+        return editMenuListener;
+    }
+
+    public ViewMenuListener getViewMenuListener() {
+        if (viewMenuListener == null) {
+            viewMenuListener = new ViewMenuListener();
+        }
+
+        return viewMenuListener;
+    }
 
     public AddNewNoteButtonActionListener getAddNewNoteButtonActionListener() {
         if (addNewNoteButtonActionListener == null) {
@@ -186,6 +207,52 @@ public class MainController {
         return new DuplicateNoteActionListener(currentDataView);
     }
 
+    private class EditMenuListener implements MenuListener {
+        @Override
+        public void menuSelected(MenuEvent e) {
+            if (e.getSource() instanceof JMenu) {
+                JMenu menu = (JMenu) e.getSource();
+                for (int i = 0; i < menu.getMenuComponentCount(); i++) {
+                    Component menuComponent = menu.getMenuComponent(i);
+                    if (MainView.EDIT_TAG.equals(menuComponent.getName())) {
+                        menuComponent.setEnabled(mainView.isNoteSelected());
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void menuDeselected(MenuEvent e) {
+
+        }
+
+        @Override
+        public void menuCanceled(MenuEvent e) {
+
+        }
+    }
+
+    private class ViewMenuListener implements MenuListener {
+        @Override
+        public void menuSelected(MenuEvent e) {
+            if (e.getSource() instanceof JMenu) {
+                JMenu menu = (JMenu) e.getSource();
+                for (int i = 0; i < menu.getMenuComponentCount(); i++) {
+                    Component menuComponent = menu.getMenuComponent(i);
+                    menuComponent.setEnabled(!mainView.getCurrentDataViewClass().equals(menuComponent.getName()));
+                }
+            }
+        }
+
+        @Override
+        public void menuDeselected(MenuEvent e) {
+        }
+
+        @Override
+        public void menuCanceled(MenuEvent e) {
+        }
+    }
+
     private class AddNewNoteButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -256,8 +323,13 @@ public class MainController {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+            if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
                 doEdit();
+            }
+
+            if (SwingUtilities.isRightMouseButton(e)) {
+                int row = dataView.locationToIndex(e.getPoint());
+                dataView.setSelectedIndex(row);
             }
         }
 
@@ -296,8 +368,19 @@ public class MainController {
                 return;
             }
 
-            model.removeNote(note);
-            mainView.update();
+            int result = JOptionPane.showOptionDialog(mainView,
+                    "Вы действительно хотите удалить запись?",
+                    "Подтвердите удаление",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[]{"Да", "Нет"},
+                    "Нет");
+
+            if (result == JOptionPane.YES_OPTION) {
+                model.removeNote(note);
+                mainView.update();
+            }
         }
     }
 

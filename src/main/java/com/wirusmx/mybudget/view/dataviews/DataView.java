@@ -27,6 +27,10 @@ public abstract class DataView extends JPanel {
 
     public abstract Note getSelectedValue();
 
+    public abstract int locationToIndex(Point point);
+
+    public abstract void setSelectedIndex(int index);
+
     abstract void clearView();
 
     abstract void setViewValues();

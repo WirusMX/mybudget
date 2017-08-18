@@ -24,6 +24,8 @@ import java.util.Set;
  * @author Piunov M (aka WirusMX)
  */
 public class MainView extends JFrame {
+    public static final String EDIT_TAG = "#!EDIT!#";
+
     private MainController controller;
     private ResourcesManager resourcesManager;
 
@@ -97,7 +99,11 @@ public class MainView extends JFrame {
                 + String.format(Note.PRICE_FORMAT, totalByNecessity[1]) + " руб. - низкой необходимости");
     }
 
-    public void showAboutDialog(){
+    public String getCurrentDataViewClass() {
+        return currentDataView.getClass().getName();
+    }
+
+    public void showAboutDialog() {
         JLabel messageLabel = new JLabel(resourcesManager.getText("about"));
         messageLabel.setFont(new Font("Monospased", Font.PLAIN, 14));
         JOptionPane.showMessageDialog(this,
@@ -105,7 +111,7 @@ public class MainView extends JFrame {
                 "О программе", JOptionPane.PLAIN_MESSAGE);
     }
 
-    public void showUsingRulesDialog(){
+    public void showUsingRulesDialog() {
         JLabel messageLabel = new JLabel(resourcesManager.getText("using_rules"));
         messageLabel.setFont(new Font("Monospased", Font.PLAIN, 12));
         JScrollPane scrollPane = new JScrollPane(messageLabel);
@@ -158,6 +164,7 @@ public class MainView extends JFrame {
     private void addMainMenu(JMenuBar menuBar) {
 
         JMenu fileMenu = new JMenu("Файл");
+        fileMenu.addMenuListener(controller.getEditMenuListener());
 
         fileMenu.add(
                 createMenuItem(
@@ -171,6 +178,7 @@ public class MainView extends JFrame {
         fileMenu.add(
                 createMenuItem(
                         "Изменить запись",
+                        EDIT_TAG,
                         KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
                         controller.getEditNoteActionListener(currentDataView),
                         "edit"
@@ -180,6 +188,7 @@ public class MainView extends JFrame {
         fileMenu.add(
                 createMenuItem(
                         "Дублировать",
+                        EDIT_TAG,
                         KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK),
                         controller.getDuplicateNoteActionListener(currentDataView),
                         "duplicate"
@@ -189,6 +198,7 @@ public class MainView extends JFrame {
         fileMenu.add(
                 createMenuItem(
                         "Удалить запись",
+                        EDIT_TAG,
                         KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
                         controller.getRemoveNoteButtonActionListener(currentDataView),
                         "remove"
@@ -209,10 +219,12 @@ public class MainView extends JFrame {
         menuBar.add(fileMenu);
 
         JMenu viewMenu = new JMenu("Вид");
+        viewMenu.addMenuListener(controller.getViewMenuListener());
 
         viewMenu.add(
                 createMenuItem(
                         "Список",
+                        ListView.class.getName(),
                         KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK),
                         controller.getDataViewButtonActionListener(dataViews[0], 0),
                         "list_view"
@@ -222,6 +234,7 @@ public class MainView extends JFrame {
         viewMenu.add(
                 createMenuItem(
                         "Таблица",
+                        TableView.class.getName(),
                         KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK),
                         controller.getDataViewButtonActionListener(dataViews[1], 1),
                         "table_view"
@@ -276,6 +289,10 @@ public class MainView extends JFrame {
         );
 
         menuBar.add(infoMenu);
+    }
+
+    public boolean isNoteSelected() {
+        return currentDataView.getSelectedValue() != null;
     }
 
     private void addControlPanel(JMenuBar menuBar) {
@@ -337,11 +354,10 @@ public class MainView extends JFrame {
 
     private JPopupMenu createNotesListPopupMenu() {
         JPopupMenu popupMenu = new JPopupMenu();
-
         popupMenu.add(
                 createMenuItem(
                         "Новая запись",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK),
+                        null,
                         controller.getAddNewNoteButtonActionListener(),
                         "new"
                 )
@@ -350,7 +366,8 @@ public class MainView extends JFrame {
         popupMenu.add(
                 createMenuItem(
                         "Изменить запись",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK),
+                        EDIT_TAG,
+                        null,
                         controller.getEditNoteActionListener(currentDataView),
                         "edit"
                 )
@@ -359,7 +376,8 @@ public class MainView extends JFrame {
         popupMenu.add(
                 createMenuItem(
                         "Дублировать",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK),
+                        EDIT_TAG,
+                        null,
                         controller.getDuplicateNoteActionListener(currentDataView),
                         "duplicate"
                 )
@@ -368,7 +386,8 @@ public class MainView extends JFrame {
         popupMenu.add(
                 createMenuItem(
                         "Удалить запись",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK),
+                        EDIT_TAG,
+                        null,
                         controller.getRemoveNoteButtonActionListener(currentDataView),
                         "remove"
                 )
@@ -378,15 +397,25 @@ public class MainView extends JFrame {
     }
 
     private JMenuItem createMenuItem(String title, KeyStroke keyStroke, ActionListener actionListener, String imageName) {
+        return createMenuItem(title, null, keyStroke, actionListener, imageName);
+    }
+
+    private JMenuItem createMenuItem(String title, String name, KeyStroke keyStroke, ActionListener actionListener, String imageName) {
         JMenuItem menuItem = new JMenuItem(title);
+
+        if (name != null) {
+            menuItem.setName(name);
+        }
+
         if (keyStroke != null) {
             menuItem.setAccelerator(keyStroke);
         }
+
         menuItem.addActionListener(actionListener);
         if (imageName != null) {
             menuItem.setIcon(resourcesManager.getImage(imageName));
         }
+
         return menuItem;
     }
-
 }

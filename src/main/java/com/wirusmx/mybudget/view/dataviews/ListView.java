@@ -22,19 +22,31 @@ public class ListView extends DataView {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                Color color = Color.WHITE;
+
                 if (value instanceof Note) {
-                    if (((Note) value).getNecessity().getId() == Note.Necessity.LOW  && ((Note) value).isBySale()) {
-                        setBackground(Color.ORANGE);
+                    if (((Note) value).getNecessity().getId() == Note.Necessity.LOW && ((Note) value).isBySale()) {
+                        color = Color.ORANGE;
                     } else {
                         if (((Note) value).isBySale()) {
-                            setBackground(Color.GREEN);
+                            color = Color.GREEN;
                         } else {
                             if (((Note) value).getNecessity().getId() == Note.Necessity.LOW) {
-                                setBackground(Color.PINK);
+                                color = Color.PINK;
                             }
                         }
                     }
                 }
+
+
+                if (isSelected) {
+                    color = Color.LIGHT_GRAY;
+                }
+
+                setBackground(color);
+                setForeground(Color.BLACK);
+
                 c.setFont(new Font("Monospaced", Font.PLAIN, 13));
                 return c;
             }
@@ -56,6 +68,16 @@ public class ListView extends DataView {
     @Override
     public Note getSelectedValue() {
         return notesList.getSelectedValue();
+    }
+
+    @Override
+    public int locationToIndex(Point point) {
+        return notesList.locationToIndex(point);
+    }
+
+    @Override
+    public void setSelectedIndex(int index) {
+        notesList.setSelectedIndex(index);
     }
 
     @Override

@@ -6,14 +6,16 @@ import com.wirusmx.mybudget.managers.DatabaseManager;
 import com.wirusmx.mybudget.managers.UserSettingsManager;
 import com.wirusmx.mybudget.model.comparators.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Piunov M (aka WirusMX)
  */
-public class Model {
+public class Model extends CommonModel {
     private MainController controller;
-    private DatabaseManager databaseManager;
     private UserSettingsManager userSettingsManager;
 
     private MyComparator[] comparators;
@@ -26,8 +28,8 @@ public class Model {
     private int dataViewID = 0;
 
     public Model(MainController controller, DatabaseManager databaseManager, UserSettingsManager userSettingsManager) {
+        super(databaseManager);
         this.controller = controller;
-        this.databaseManager = databaseManager;
         this.userSettingsManager = userSettingsManager;
     }
 
@@ -117,24 +119,6 @@ public class Model {
     }
 
     /**
-     * Extracts periods of specified type from data base.
-     *
-     * @param selectedPeriodType type of period.
-     * @return set of periods.
-     */
-    private Set<String> getPeriods(int selectedPeriodType) {
-        switch (selectedPeriodType) {
-            case PeriodType.YEAR:
-                return getYears();
-            case PeriodType.MONTH:
-                return getMonths();
-            case PeriodType.DAY:
-                return getDays();
-        }
-        return new TreeSet<>();
-    }
-
-    /**
      * Loads user settings from *.properties file.
      */
     private void loadUserSettings() {
@@ -218,59 +202,5 @@ public class Model {
             DefaultExceptionHandler.handleException(controller, ex, "Ошибка базы данных!");
         }
     }
-
-    private Set<String> getYears() {
-        List<String> temp = new ArrayList<>();
-
-        try {
-            temp = databaseManager.getYears();
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-
-
-        return new TreeSet<>(temp).descendingSet();
-    }
-
-    private Set<String> getMonths() {
-        List<String> temp = new ArrayList<>();
-
-        try {
-            temp = databaseManager.getMonths();
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-        return new TreeSet<>(temp).descendingSet();
-    }
-
-    private Set<String> getDays() {
-        List<String> temp = new ArrayList<>();
-
-        try {
-            temp = databaseManager.getDays();
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-        return new TreeSet<>(temp).descendingSet();
-    }
-
-    public static class PeriodType {
-        public static final int ALL = 0;
-        public static final int YEAR = 1;
-        public static final int MONTH = 2;
-        public static final int DAY = 3;
-    }
-
-    @SuppressWarnings("unused")
-    public static class SortType {
-        public static final int UNDEFINED = -1;
-        public static final int DATE = 0;
-        public static final int ITEM = 1;
-        public static final int TYPE = 2;
-        public static final int PRICE = 3;
-        public static final int SHOP = 4;
-        public static final int BY_SALE = 5;
-    }
-
 }
 

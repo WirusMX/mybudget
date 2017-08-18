@@ -36,6 +36,7 @@ public class TableView extends DataView {
         };
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         table.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tableModel.setColumnIdentifiers(tableHeader);
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
@@ -57,6 +58,12 @@ public class TableView extends DataView {
                     }
                 }
 
+                if (isSelected){
+                    color = Color.LIGHT_GRAY;
+                }
+
+
+                cell.setForeground(Color.black);
                 cell.setBackground(color);
                 return cell;
             }
@@ -90,6 +97,18 @@ public class TableView extends DataView {
     }
 
     @Override
+    public int locationToIndex(Point point) {
+        return table.rowAtPoint(point);
+    }
+
+    @Override
+    public void setSelectedIndex(int index) {
+        if (index >= 0){
+            table.setRowSelectionInterval(index, index);
+        }
+    }
+
+    @Override
     void clearView() {
         int rowCount = tableModel.getRowCount();
         for (int i = rowCount - 1; i >= 0; i--) {
@@ -101,14 +120,14 @@ public class TableView extends DataView {
     void setViewValues() {
         for (Note n : notes) {
             String total = n.getTotalAsString() + " руб.";
-            if (n.getCount() != 1f || n.isBySale()){
+            if (n.getCount() != 1f || n.isBySale()) {
                 total += "(";
 
-                if (n.getCount() != 1f){
+                if (n.getCount() != 1f) {
                     total += n.getPriceAsString() + " руб./" + n.getCountType() + " ";
                 }
 
-                if (n.isBySale()){
+                if (n.isBySale()) {
                     total += "со скидкой";
                 }
 

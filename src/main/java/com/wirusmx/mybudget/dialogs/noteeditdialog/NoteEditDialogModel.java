@@ -2,24 +2,26 @@ package com.wirusmx.mybudget.dialogs.noteeditdialog;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.managers.DatabaseManager;
-import com.wirusmx.mybudget.model.Model;
+import com.wirusmx.mybudget.model.CommonModel;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 
 import javax.swing.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author Piunov M (aka WirusMX)
  */
-class NoteEditDialogModel {
+class NoteEditDialogModel extends CommonModel {
     private Note currentNote;
-    private DatabaseManager databaseManager;
     private int dialogResult = JOptionPane.NO_OPTION;
 
     NoteEditDialogModel(Note currentNote, DatabaseManager databaseManager) {
+        super(databaseManager);
         this.currentNote = currentNote;
-        this.databaseManager = databaseManager;
     }
 
     /**
@@ -143,42 +145,4 @@ class NoteEditDialogModel {
         return text;
     }
 
-    /**
-     * Extracts pares of (id, title) from <code>table</code>.
-     *
-     * @param tableName name of table which contains values for ComboBox.
-     * @return ComboBox values set with the default order.
-     * @see Model.ComboBoxValuesComparator
-     */
-     Set<SimpleData> getComboBoxValues(String tableName) {
-        Set<SimpleData> values = new TreeSet<>(new ComboBoxValuesComparator());
-
-        try {
-            List<SimpleData> temp = databaseManager.getComboBoxValues(tableName);
-            values.addAll(temp);
-        } catch (Exception ex) {
-            DefaultExceptionHandler.handleException(ex);
-        }
-
-        return values;
-    }
-
-    /**
-     * Compare two {@link SimpleData} values. Value with <code>id = 0</code>
-     * is less then others. If values <code>id != 0</code>, they compare by title.
-     */
-    private static class ComboBoxValuesComparator implements Comparator<SimpleData> {
-        @Override
-        public int compare(SimpleData o1, SimpleData o2) {
-            if (o1.getId() == 0) {
-                return -1;
-            }
-
-            if (o2.getId() == 0) {
-                return 1;
-            }
-
-            return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
-        }
-    }
 }
