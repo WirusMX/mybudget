@@ -35,6 +35,8 @@ public class MainView extends JFrame {
     private JLabel statLabel = new JLabel();
     private JPanel centerPanel;
 
+    private JTextField searchTextField;
+
     public MainView(MainController controller, ResourcesManager resourcesManager) {
         this.controller = controller;
         this.resourcesManager = resourcesManager;
@@ -295,6 +297,14 @@ public class MainView extends JFrame {
         return currentDataView.getSelectedValue() != null;
     }
 
+    public String getSearchQuery(){
+        return searchTextField.getText();
+    }
+
+    public void resetSearchQuery(){
+        searchTextField.setText("");
+    }
+
     private void addControlPanel(JMenuBar menuBar) {
         menuBar.add(new JLabel("Показать записи за период: "));
         JComboBox<SimpleData> periodTypeComboBox = new JComboBox<>();
@@ -339,16 +349,16 @@ public class MainView extends JFrame {
 
         menuBar.add(new JLabel(" | "));
 
-        JTextField searchTextField = new JTextField("");
+        searchTextField = new JTextField("");
         menuBar.add(searchTextField);
         JButton searchButton = new JButton("Поиск");
-        searchButton.addActionListener(controller.getSearchButtonActionListener(searchTextField));
+        searchButton.addActionListener(controller.getSearchButtonActionListener());
         menuBar.add(searchButton);
 
         menuBar.add(new JLabel(" "));
 
         JButton resetButton = new JButton("Сбросить");
-        resetButton.addActionListener(controller.getResetButtonActionListener(searchTextField));
+        resetButton.addActionListener(controller.getResetButtonActionListener());
         menuBar.add(resetButton);
     }
 

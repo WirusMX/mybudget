@@ -161,16 +161,16 @@ public class MainController {
         return sortOrderComboBoxItemListener;
     }
 
-    public SearchButtonActionListener getSearchButtonActionListener(JTextField textField) {
+    public SearchButtonActionListener getSearchButtonActionListener() {
         if (searchButtonActionListener == null) {
-            searchButtonActionListener = new SearchButtonActionListener(textField);
+            searchButtonActionListener = new SearchButtonActionListener();
         }
         return searchButtonActionListener;
     }
 
-    public ResetButtonActionListener getResetButtonActionListener(JTextField textField) {
+    public ResetButtonActionListener getResetButtonActionListener() {
         if (resetButtonActionListener == null) {
-            resetButtonActionListener = new ResetButtonActionListener(textField);
+            resetButtonActionListener = new ResetButtonActionListener();
         }
         return resetButtonActionListener;
     }
@@ -524,30 +524,17 @@ public class MainController {
     }
 
     private class SearchButtonActionListener implements ActionListener {
-
-        private JTextField searchTextField;
-
-        SearchButtonActionListener(JTextField searchTextField) {
-            this.searchTextField = searchTextField;
-        }
-
         @Override
         public void actionPerformed(ActionEvent e) {
-            model.setSearchQuery(searchTextField.getText());
+            model.setSearchQuery(mainView.getSearchQuery());
             mainView.update();
         }
     }
 
     private class ResetButtonActionListener implements ActionListener {
-        JTextField textField;
-
-        ResetButtonActionListener(JTextField textField) {
-            this.textField = textField;
-        }
-
         @Override
         public void actionPerformed(ActionEvent e) {
-            textField.setText("");
+            mainView.resetSearchQuery();
             model.setSearchQuery("");
             mainView.update();
         }
