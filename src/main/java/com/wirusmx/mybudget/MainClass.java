@@ -15,11 +15,11 @@ import com.wirusmx.mybudget.view.MainView;
  */
 public class MainClass {
     public static void main(String[] args) {
-        MainController controller = new MainController();
-
         ResourcesManager resourcesManager = ResourcesManager.getInstance();
         DatabaseManager databaseManager = DatabaseManager.getInstance(resourcesManager.getProperty("application.version"));
         UserSettingsManager userSettingsManager = UserSettingsManager.getInstance();
+
+        MainController controller = new MainController(userSettingsManager);
 
         Model model = new Model(controller, databaseManager, userSettingsManager);
 

@@ -52,6 +52,18 @@ public class UserSettingsManager {
         return result;
     }
 
+    public boolean getBooleanValue(String key, boolean defaultValue) {
+        boolean result = defaultValue;
+
+        try {
+            result = "1".equals(userSettings.getProperty(key));
+        } catch (NumberFormatException ex) {
+            DefaultExceptionHandler.handleException(ex);
+        }
+
+        return result;
+    }
+
     public void setValue(String key, String value) {
         userSettings.setProperty(key, value);
         saveUserSettings();

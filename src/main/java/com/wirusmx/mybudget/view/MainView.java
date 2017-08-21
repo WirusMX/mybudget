@@ -36,6 +36,8 @@ public class MainView extends JFrame {
     private JPanel centerPanel;
 
     private JTextField searchTextField;
+    private JButton resetButton;
+    private JButton searchButton;
 
     public MainView(MainController controller, ResourcesManager resourcesManager) {
         this.controller = controller;
@@ -163,6 +165,27 @@ public class MainView extends JFrame {
         periodComboBox.setSelectedIndex(pos);
     }
 
+
+    public boolean isNoteSelected() {
+        return currentDataView.getSelectedValue() != null;
+    }
+
+    public String getSearchQuery(){
+        return searchTextField.getText();
+    }
+
+    public void resetSearchQuery(){
+        searchTextField.setText("");
+    }
+
+    public void doSearchButtonClick(){
+        searchButton.doClick();
+    }
+
+    public void doResetButtonClick(){
+        resetButton.doClick();
+    }
+
     private void addMainMenu(JMenuBar menuBar) {
 
         JMenu fileMenu = new JMenu("Файл");
@@ -255,7 +278,7 @@ public class MainView extends JFrame {
                         "stat"
                 )
         );
-/*
+
         toolsMenu.addSeparator();
 
 
@@ -267,7 +290,7 @@ public class MainView extends JFrame {
                         "settings"
                 )
         );
-*/
+
         menuBar.add(toolsMenu);
 
         JMenu infoMenu = new JMenu("Справка");
@@ -291,18 +314,6 @@ public class MainView extends JFrame {
         );
 
         menuBar.add(infoMenu);
-    }
-
-    public boolean isNoteSelected() {
-        return currentDataView.getSelectedValue() != null;
-    }
-
-    public String getSearchQuery(){
-        return searchTextField.getText();
-    }
-
-    public void resetSearchQuery(){
-        searchTextField.setText("");
     }
 
     private void addControlPanel(JMenuBar menuBar) {
@@ -350,14 +361,15 @@ public class MainView extends JFrame {
         menuBar.add(new JLabel(" | "));
 
         searchTextField = new JTextField("");
+        searchTextField.addKeyListener(controller.getSearchTextFieldKeyListener());
         menuBar.add(searchTextField);
-        JButton searchButton = new JButton("Поиск");
+        searchButton = new JButton("Поиск");
         searchButton.addActionListener(controller.getSearchButtonActionListener());
         menuBar.add(searchButton);
 
         menuBar.add(new JLabel(" "));
 
-        JButton resetButton = new JButton("Сбросить");
+        resetButton = new JButton("Сбросить");
         resetButton.addActionListener(controller.getResetButtonActionListener());
         menuBar.add(resetButton);
     }

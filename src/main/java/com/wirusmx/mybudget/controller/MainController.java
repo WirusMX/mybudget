@@ -2,7 +2,9 @@ package com.wirusmx.mybudget.controller;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.dialogs.noteeditdialog.NoteEditDialog;
+import com.wirusmx.mybudget.dialogs.optionsdialog.OptionsDialog;
 import com.wirusmx.mybudget.dialogs.statisticsdialog.StatisticsDialog;
+import com.wirusmx.mybudget.managers.UserSettingsManager;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
@@ -23,6 +25,11 @@ import java.util.Set;
 public class MainController {
     private MainView mainView;
     private Model model;
+    private UserSettingsManager userSettingsManager;
+
+    public MainController(UserSettingsManager userSettingsManager) {
+        this.userSettingsManager = userSettingsManager;
+    }
 
     public void setMainView(MainView mainView) {
         this.mainView = mainView;
@@ -57,6 +64,7 @@ public class MainController {
     private PeriodComboBoxItemListener periodComboBoxItemListener = null;
     private SortTypeComboBoxItemListener sortTypeComboBoxItemListener = null;
     private SortOrderComboBoxItemListener sortOrderComboBoxItemListener = null;
+    private KeyListener searchTextFieldKeyListener = null;
     private SearchButtonActionListener searchButtonActionListener = null;
     private ResetButtonActionListener resetButtonActionListener = null;
 
@@ -159,6 +167,13 @@ public class MainController {
             sortOrderComboBoxItemListener = new SortOrderComboBoxItemListener();
         }
         return sortOrderComboBoxItemListener;
+    }
+
+    public KeyListener getSearchTextFieldKeyListener() {
+        if (searchTextFieldKeyListener == null) {
+            searchTextFieldKeyListener = new SearchTextFieldKeyListener();
+        }
+        return searchTextFieldKeyListener;
     }
 
     public SearchButtonActionListener getSearchButtonActionListener() {
@@ -412,7 +427,7 @@ public class MainController {
     private class SettingsButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            new OptionsDialog();
         }
     }
 
@@ -520,6 +535,32 @@ public class MainController {
 
             model.setSelectedSortOrder(sortOrder);
             mainView.update();
+        }
+    }
+
+    private class SearchTextFieldKeyListener implements KeyListener {
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                mainView.doResetButtonClick();
+                return;
+            }
+
+            if (e.getKeyCode() == KeyEvent.VK_ENTER ||
+                    userSettingsManager.getBooleanValue("main.window.use.live.search", false)){
+                mainView.doSearchButtonClick();
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
         }
     }
 

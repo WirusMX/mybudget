@@ -18,7 +18,7 @@ public class NoteEditDialog {
     public NoteEditDialog(Note note) {
         NoteEditDialogController controller = new NoteEditDialogController();
         NoteEditDialogView view = new NoteEditDialogView(controller, ResourcesManager.getInstance());
-         model = new NoteEditDialogModel(note, DatabaseManager.getInstance());
+        model = new NoteEditDialogModel(note, DatabaseManager.getInstance());
 
         controller.setDialogView(view);
         controller.setDialogModel(model);
@@ -30,7 +30,7 @@ public class NoteEditDialog {
         return model.getDialogResult();
     }
 
-    public Note getNote(){
+    public Note getNote() {
         return model.getNote();
     }
 }

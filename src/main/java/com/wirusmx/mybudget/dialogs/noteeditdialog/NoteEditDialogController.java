@@ -97,13 +97,12 @@ class NoteEditDialogController {
 
             itemsComboBox.removeAllItems();
 
-            if (textField.getText().length() < 2) {
+            if (textField.getText().length() <= 2) {
                 return;
             }
 
             Set<String> items = dialogModel.getItemsSet();
-
-
+            
             for (String s : items) {
                 if (s.toLowerCase().contains(textField.getText().toLowerCase())) {
                     itemsComboBox.addItem(s);

@@ -148,7 +148,9 @@ public class Model extends CommonModel {
             String sq = searchQuery.toLowerCase();
 
             for (Note n : result) {
-                if (n.getItemTitle().toLowerCase().contains(sq)) {
+                if (n.getItemTitle().toLowerCase().contains(sq)
+                        || n.getShop().toString().toLowerCase().contains(sq)
+                        && userSettingsManager.getBooleanValue("main.window.search.by.shop", false)) {
                     temp.add(n);
                 }
             }
