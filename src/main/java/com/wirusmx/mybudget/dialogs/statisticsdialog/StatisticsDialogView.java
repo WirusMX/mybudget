@@ -1,5 +1,6 @@
 package com.wirusmx.mybudget.dialogs.statisticsdialog;
 
+import com.wirusmx.mybudget.dialogs.AbstractDialogView;
 import com.wirusmx.mybudget.managers.ResourcesManager;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.SimpleData;
@@ -7,7 +8,6 @@ import com.wirusmx.mybudget.model.SimpleData;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.Set;
 
 /**
@@ -15,9 +15,13 @@ import java.util.Set;
  *
  * @author Piunov M (aka WirusMX)
  */
-class StatisticsDialogView extends JDialog {
+class StatisticsDialogView extends AbstractDialogView {
+    private static final int DIALOG_WIDTH = 1000;
+    private static final int DIALOG_HEIGHT = 600;
+    private static final String DIALOG_TITLE = "Статистика";
+    private static final String ICON_IMAGE = "stat";
+
     private StatisticsDialogController controller;
-    private ResourcesManager resourcesManager;
 
     private JPanel graphPanel;
     private DefaultTableModel tableModel;
@@ -27,8 +31,8 @@ class StatisticsDialogView extends JDialog {
     private int selectedItemType;
 
     StatisticsDialogView(StatisticsDialogController controller, ResourcesManager resourcesManager) {
+        super(DIALOG_WIDTH, DIALOG_HEIGHT, DIALOG_TITLE, ICON_IMAGE, controller, resourcesManager);
         this.controller = controller;
-        this.resourcesManager = resourcesManager;
     }
 
     void setSelectedPeriod(String selectedPeriod) {
@@ -39,17 +43,7 @@ class StatisticsDialogView extends JDialog {
         this.selectedItemType = selectedItemType;
     }
 
-    void init() {
-        setSize(1000, 600);
-        setModal(true);
-        setLocationRelativeTo(null);
-        setIconImage(resourcesManager.getImage("stat").getImage());
-        getRootPane().registerKeyboardAction(
-                controller.getCloseStatisticsDialogButtonActionListener(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
-
+    protected void initDialogContent() {
         setLayout(new BorderLayout(3, 3));
 
         JPanel controlPanel = new JPanel();
@@ -113,9 +107,6 @@ class StatisticsDialogView extends JDialog {
 
         update();
         graphPanel.repaint();
-
-        setVisible(true);
-
     }
 
     void update() {

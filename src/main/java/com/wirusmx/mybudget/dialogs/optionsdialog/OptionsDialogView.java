@@ -1,56 +1,67 @@
 package com.wirusmx.mybudget.dialogs.optionsdialog;
 
+import com.wirusmx.mybudget.dialogs.AbstractDialogView;
 import com.wirusmx.mybudget.managers.ResourcesManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 
 /**
  * @author Piunov M (aka WirusMX)
  */
-class OptionsDialogView extends JDialog {
-    private static final int DIALOG_WIDTH = 800;
-    private static final int DIALOG_HEIGHT = 600;
+class OptionsDialogView extends AbstractDialogView {
+    private static final int DIALOG_WIDTH = 600;
+    private static final int DIALOG_HEIGHT = 400;
+    private static final String DIALOG_TITLE = "Настройки приложения";
+    private static final String ICON_IMAGE = "settings";
 
     private JButton applyButton;
 
     private OptionsDialogController controller;
-    private ResourcesManager resourcesManager;
 
     OptionsDialogView(OptionsDialogController controller, ResourcesManager resourcesManager) {
+        super(DIALOG_WIDTH, DIALOG_HEIGHT, DIALOG_TITLE, ICON_IMAGE, controller, resourcesManager);
         this.controller = controller;
-        this.resourcesManager = resourcesManager;
     }
 
-    void init() {
-        setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-        setModal(true);
-        setLocationRelativeTo(null);
-        setTitle("Настройки приложения");
-        setIconImage(resourcesManager.getImage("settings").getImage());
-        getRootPane().registerKeyboardAction(
-                controller.getCloseDialogButtonActionListener(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
-        setResizable(false);
+    protected void initDialogContent() {
         setLayout(new BorderLayout());
-
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setTabPlacement(JTabbedPane.LEFT);
+        tabbedPane.addTab("Вид", getLookOptionsPanel());
         tabbedPane.addTab("Поиск", getSearchOptionsPanel());
 
         add(tabbedPane, BorderLayout.CENTER);
 
         add(getButtonsPanel(), BorderLayout.SOUTH);
 
-        setVisible(true);
     }
 
     void setApplyButtonEnabled(boolean value){
         applyButton.setEnabled(value);
+    }
+
+    private JPanel getLookOptionsPanel() {
+        JPanel panel = new JPanel(null);
+
+        JCheckBox useSystemLook = new JCheckBox("Использовать системный внешний вид");
+        useSystemLook.setToolTipText("Потребуется перезагрузка программы");
+        useSystemLook.setBounds(10, 10, DIALOG_WIDTH - 10, 25);
+        useSystemLook.setSelected(controller.getOption("main.window.use.system.look", false));
+        useSystemLook.setName("main.window.use.system.look");
+        useSystemLook.addActionListener(controller.getComponentActionListener());
+        panel.add(useSystemLook);
+
+        JCheckBox useColors = new JCheckBox("Подсвечивать расходы разных категорий");
+        useColors.setToolTipText("Потребуется перезагрузка программы");
+        useColors.setBounds(10, 35, DIALOG_WIDTH - 10, 25);
+        useColors.setSelected(controller.getOption("main.window.use.colors", false));
+        useColors.setName("main.window.use.colors");
+        useColors.addActionListener(controller.getComponentActionListener());
+        panel.add(useColors);
+
+        return panel;
     }
 
     private JPanel getSearchOptionsPanel() {

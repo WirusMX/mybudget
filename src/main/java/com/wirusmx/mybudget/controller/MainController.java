@@ -48,6 +48,14 @@ public class MainController {
         }
     }
 
+    public boolean isUseSystemLook(){
+        return userSettingsManager.getBooleanValue("main.window.use.system.look", false);
+    }
+
+    public boolean isUseColors() {
+        return userSettingsManager.getBooleanValue("main.window.use.colors", false);
+    }
+
     public List<Note> getNotes() {
         return model.getNotes();
     }
@@ -119,7 +127,6 @@ public class MainController {
         return statisticsButtonActionListener;
     }
 
-    @SuppressWarnings("unused")
     public SettingsButtonActionListener getSettingsButtonActionListener() {
         if (settingsButtonActionListener == null) {
             settingsButtonActionListener = new SettingsButtonActionListener();

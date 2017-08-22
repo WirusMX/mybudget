@@ -1,11 +1,11 @@
 package com.wirusmx.mybudget.dialogs.noteeditdialog;
 
+import com.wirusmx.mybudget.dialogs.AbstractDialogView;
 import com.wirusmx.mybudget.managers.ResourcesManager;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 
 import javax.swing.*;
-import java.awt.event.KeyEvent;
 import java.util.Set;
 
 /**
@@ -15,7 +15,7 @@ import java.util.Set;
  *
  * @author Piunov M (aka WirusMX)
  */
-class NoteEditDialogView extends JDialog {
+class NoteEditDialogView extends AbstractDialogView {
     /**
      * X coordinate for first column.
      */
@@ -46,9 +46,12 @@ class NoteEditDialogView extends JDialog {
      * <code>Y = Y0 +  DELTA_Y * elementsLine</code>.
      */
     private static final int DELTA_Y = 30;
+    private static final int DIALOG_WIDTH = 500;
+    private static final int DIALOG_HEIGHT = 320;
+    private static final String ICON_IMAGE = "edit";
+    private static final String DIALOG_TITLE = "";
 
     private final NoteEditDialogController controller;
-    private final ResourcesManager resourcesManager;
 
     private JTextField itemTitleTextField;
     private JComboBox<SimpleData> itemTypeComboBox;
@@ -67,8 +70,8 @@ class NoteEditDialogView extends JDialog {
      * @param controller - application controller.
      */
     NoteEditDialogView(NoteEditDialogController controller, ResourcesManager resourcesManager) {
+        super(DIALOG_WIDTH, DIALOG_HEIGHT, DIALOG_TITLE, ICON_IMAGE, controller, resourcesManager);
         this.controller = controller;
-        this.resourcesManager = resourcesManager;
     }
 
     String getItemTitle() {
@@ -79,58 +82,48 @@ class NoteEditDialogView extends JDialog {
         return (SimpleData) itemTypeComboBox.getSelectedItem();
     }
 
-     Float getItemPrice() {
+    Float getItemPrice() {
         return Float.parseFloat(itemPriceTextField.getText());
     }
 
-     Float getItemsCount() {
+    Float getItemsCount() {
         return Float.parseFloat(itemsCountTextField.getText());
     }
 
-     SimpleData getCountType() {
+    SimpleData getCountType() {
         return (SimpleData) countTypeComboBox.getSelectedItem();
     }
 
-     SimpleData getShop() {
+    SimpleData getShop() {
         return (SimpleData) shopComboBox.getSelectedItem();
     }
 
-     SimpleData getNecessity() {
+    SimpleData getNecessity() {
         return (SimpleData) necessityLevelComboBox.getSelectedItem();
     }
 
-     SimpleData getQuality() {
+    SimpleData getQuality() {
         return (SimpleData) qualityLevelComboBox.getSelectedItem();
     }
 
-     boolean isBySale() {
+    boolean isBySale() {
         return saleCheckBox.isSelected();
     }
 
-     String getDay() {
+    String getDay() {
         return dayTextField.getText();
     }
 
-     String getMonth() {
+    String getMonth() {
         return monthTextField.getText();
     }
 
-     String getYear() {
+    String getYear() {
         return yearTextField.getText();
     }
 
-    void init() {
-        setSize(500, 320);
+    protected void initDialogContent() {
         setLayout(null);
-        setModal(true);
-        setLocationRelativeTo(null);
-        setIconImage(resourcesManager.getImage("edit").getImage());
-
-        getRootPane().registerKeyboardAction(
-                controller.getCloseDialogButtonActionListener(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
 
         int secondColElementWidth = getWidth() - 20 - SECOND_COL_X_POS;
         int elementsLine = 0;
@@ -288,7 +281,6 @@ class NoteEditDialogView extends JDialog {
         add(closeButton);
 
         setSize(500, Y0 + DELTA_Y * elementsLine + 100);
-        setVisible(true);
     }
 
     private void selectValue(JComboBox<SimpleData> comboBox, SimpleData value) {

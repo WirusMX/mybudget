@@ -1,5 +1,7 @@
 package com.wirusmx.mybudget.dialogs.optionsdialog;
 
+import com.wirusmx.mybudget.dialogs.AbstractDialogController;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +9,7 @@ import java.awt.event.ActionListener;
 /**
  * @author Piunov M (aka WirusMX)
  */
-class OptionsDialogController {
+class OptionsDialogController extends AbstractDialogController {
     private OptionsDialogView view;
     private OptionsDialogModel model;
 
@@ -16,6 +18,7 @@ class OptionsDialogController {
     }
 
     void setView(OptionsDialogView view) {
+        super.setDialogView(view);
         this.view = view;
     }
 
@@ -29,10 +32,6 @@ class OptionsDialogController {
 
     ComponentActionListener getComponentActionListener() {
         return new ComponentActionListener();
-    }
-
-    CloseDialogButtonActionListener getCloseDialogButtonActionListener() {
-        return new CloseDialogButtonActionListener();
     }
 
     OkButtonActionListener getOkButtonActionListener() {
@@ -64,13 +63,6 @@ class OptionsDialogController {
         public void actionPerformed(ActionEvent e) {
             model.saveCache();
             view.setApplyButtonEnabled(false);
-        }
-    }
-
-    private class CloseDialogButtonActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            view.dispose();
         }
     }
 }

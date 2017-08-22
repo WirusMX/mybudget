@@ -46,10 +46,12 @@ public class MainView extends JFrame {
     }
 
     public void init() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
+        if (controller.isUseSystemLook()) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignored) {
 
+            }
         }
 
         setTitle(resourcesManager.getProperty("application.title")
@@ -137,6 +139,7 @@ public class MainView extends JFrame {
 
             currentDataView.addMouseListener(controller.getEditNoteActionListener(currentDataView));
             currentDataView.setComponentPopupMenu(createNotesListPopupMenu());
+            currentDataView.setUseColors(controller.isUseColors());
 
             centerPanel.add(currentDataView, BorderLayout.CENTER);
             revalidate();
@@ -276,6 +279,15 @@ public class MainView extends JFrame {
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK),
                         controller.getStatisticsButtonActionListener(),
                         "stat"
+                )
+        );
+
+        toolsMenu.add(
+                createMenuItem(
+                        "Планировщик",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK),
+                        null,
+                        "planner"
                 )
         );
 

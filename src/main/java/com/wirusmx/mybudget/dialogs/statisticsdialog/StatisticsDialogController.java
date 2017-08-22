@@ -1,5 +1,6 @@
 package com.wirusmx.mybudget.dialogs.statisticsdialog;
 
+import com.wirusmx.mybudget.dialogs.AbstractDialogController;
 import com.wirusmx.mybudget.model.Model;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
@@ -15,7 +16,7 @@ import java.util.Set;
 /**
  * @author Piunov M (aka WirusMX)
  */
-class StatisticsDialogController {
+class StatisticsDialogController extends AbstractDialogController {
     private StatisticsDialogModel dialogModel;
     private StatisticsDialogView dialogView;
 
@@ -24,6 +25,7 @@ class StatisticsDialogController {
     }
 
     void setDialogView(StatisticsDialogView dialogView) {
+        super.setDialogView(dialogView);
         this.dialogView = dialogView;
     }
 
@@ -68,10 +70,6 @@ class StatisticsDialogController {
         return new StatisticsDialogItemTypeComboBoxItemListener();
     }
 
-    CloseStatisticsDialogButtonActionListener getCloseStatisticsDialogButtonActionListener() {
-        return new CloseStatisticsDialogButtonActionListener();
-    }
-
     private class StatisticsDialogPeriodComboBoxItemListener implements ItemListener {
         @Override
         public void itemStateChanged(ItemEvent e) {
@@ -105,13 +103,6 @@ class StatisticsDialogController {
 
             dialogView.setSelectedItemType(typeID);
             dialogView.update();
-        }
-    }
-
-    private class CloseStatisticsDialogButtonActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            dialogView.dispose();
         }
     }
 }

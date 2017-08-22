@@ -25,7 +25,7 @@ public class ListView extends DataView {
 
                 Color color = Color.WHITE;
 
-                if (value instanceof Note) {
+                if (value instanceof Note && useColors) {
                     if (((Note) value).getNecessity().getId() == Note.Necessity.LOW && ((Note) value).isBySale()) {
                         color = Color.ORANGE;
                     } else {

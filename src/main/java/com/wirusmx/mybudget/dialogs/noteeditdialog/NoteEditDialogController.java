@@ -1,6 +1,7 @@
 package com.wirusmx.mybudget.dialogs.noteeditdialog;
 
 import com.wirusmx.mybudget.DefaultExceptionHandler;
+import com.wirusmx.mybudget.dialogs.AbstractDialogController;
 import com.wirusmx.mybudget.model.Note;
 import com.wirusmx.mybudget.model.SimpleData;
 
@@ -11,11 +12,12 @@ import java.util.Set;
 /**
  * @author Piunov M (aka WirusMX)
  */
-class NoteEditDialogController {
+class NoteEditDialogController extends AbstractDialogController {
     private NoteEditDialogView dialogView;
     private NoteEditDialogModel dialogModel;
 
     void setDialogView(NoteEditDialogView dialogView) {
+        super.setDialogView(dialogView);
         this.dialogView = dialogView;
     }
 
@@ -65,10 +67,6 @@ class NoteEditDialogController {
 
     }
 
-    CloseNoteEditDialogButtonActionListener getCloseDialogButtonActionListener() {
-        return new CloseNoteEditDialogButtonActionListener();
-    }
-
     Note getCurrentNote() {
         return dialogModel.getNote();
     }
@@ -102,7 +100,7 @@ class NoteEditDialogController {
             }
 
             Set<String> items = dialogModel.getItemsSet();
-            
+
             for (String s : items) {
                 if (s.toLowerCase().contains(textField.getText().toLowerCase())) {
                     itemsComboBox.addItem(s);
@@ -352,13 +350,6 @@ class NoteEditDialogController {
 
             dialogModel.setPositiveDialogResult();
 
-            dialogView.dispose();
-        }
-    }
-
-    private class CloseNoteEditDialogButtonActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
             dialogView.dispose();
         }
     }

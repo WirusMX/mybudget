@@ -14,14 +14,6 @@ import java.awt.event.MouseListener;
  * @author Piunov M (aka WirusMX)
  */
 public class TableView extends DataView {
-    private final String[] tableHeader = new String[]{
-            "Товар",
-            "Магазин",
-            "Количество",
-            "Стоимость",
-            "Дата",
-            "Качество"
-    };
 
     private DefaultTableModel tableModel;
     private JTable table;
@@ -37,6 +29,14 @@ public class TableView extends DataView {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         table.setFont(new Font("Monospaced", Font.PLAIN, 13));
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        String[] tableHeader = new String[]{
+                "Товар",
+                "Магазин",
+                "Количество",
+                "Стоимость",
+                "Дата",
+                "Качество"
+        };
         tableModel.setColumnIdentifiers(tableHeader);
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
@@ -46,19 +46,21 @@ public class TableView extends DataView {
 
                 Color color = Color.WHITE;
 
-                if (note.getNecessity().getId() == Note.Necessity.LOW && note.isBySale()) {
-                    color = Color.ORANGE;
-                } else {
-                    if (note.isBySale()) {
-                        color = Color.GREEN;
+                if (useColors) {
+                    if (note.getNecessity().getId() == Note.Necessity.LOW && note.isBySale()) {
+                        color = Color.ORANGE;
                     } else {
-                        if (note.getNecessity().getId() == Note.Necessity.LOW) {
-                            color = Color.PINK;
+                        if (note.isBySale()) {
+                            color = Color.GREEN;
+                        } else {
+                            if (note.getNecessity().getId() == Note.Necessity.LOW) {
+                                color = Color.PINK;
+                            }
                         }
                     }
                 }
 
-                if (isSelected){
+                if (isSelected) {
                     color = Color.LIGHT_GRAY;
                 }
 
@@ -103,7 +105,7 @@ public class TableView extends DataView {
 
     @Override
     public void setSelectedIndex(int index) {
-        if (index >= 0){
+        if (index >= 0) {
             table.setRowSelectionInterval(index, index);
         }
     }

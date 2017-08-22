@@ -11,6 +11,7 @@ import java.util.List;
  */
 public abstract class DataView extends JPanel {
     List<Note> notes;
+    boolean useColors;
 
     DataView() {
         setLayout(new BorderLayout());
@@ -22,6 +23,13 @@ public abstract class DataView extends JPanel {
         setViewValues();
     }
 
+    public boolean isUseColors() {
+        return useColors;
+    }
+
+    public void setUseColors(boolean useColors) {
+        this.useColors = useColors;
+    }
 
     public abstract void setComponentPopupMenu(JPopupMenu popupMenu);
 
