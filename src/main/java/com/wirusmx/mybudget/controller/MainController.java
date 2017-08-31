@@ -3,6 +3,7 @@ package com.wirusmx.mybudget.controller;
 import com.wirusmx.mybudget.DefaultExceptionHandler;
 import com.wirusmx.mybudget.dialogs.noteeditdialog.NoteEditDialog;
 import com.wirusmx.mybudget.dialogs.optionsdialog.OptionsDialog;
+import com.wirusmx.mybudget.dialogs.plannerdialog.PlannerDialog;
 import com.wirusmx.mybudget.dialogs.statisticsdialog.StatisticsDialog;
 import com.wirusmx.mybudget.managers.UserSettingsManager;
 import com.wirusmx.mybudget.model.Model;
@@ -65,6 +66,7 @@ public class MainController {
     private AddNewNoteButtonActionListener addNewNoteButtonActionListener = null;
     private ExitButtonButtonActionListener exitButtonButtonActionListener = null;
     private StatisticsButtonActionListener statisticsButtonActionListener = null;
+    private PlannerButtonActionListener plannerButtonActionListener = null;
     private SettingsButtonActionListener settingsButtonActionListener = null;
     private AboutButtonActionListener aboutButtonActionListener = null;
     private UsingRulesButtonActionListener usingRulesButtonActionListener = null;
@@ -125,6 +127,15 @@ public class MainController {
             statisticsButtonActionListener = new StatisticsButtonActionListener();
         }
         return statisticsButtonActionListener;
+    }
+
+    @SuppressWarnings("unused")
+    public PlannerButtonActionListener getPlannerButtonActionListener(){
+        if (plannerButtonActionListener == null){
+            plannerButtonActionListener = new PlannerButtonActionListener();
+        }
+
+        return plannerButtonActionListener;
     }
 
     public SettingsButtonActionListener getSettingsButtonActionListener() {
@@ -428,6 +439,13 @@ public class MainController {
             model.setDataViewID(id);
             mainView.setDataView(dataViewClass);
             mainView.update();
+        }
+    }
+
+    private class PlannerButtonActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new PlannerDialog();
         }
     }
 

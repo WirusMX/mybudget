@@ -282,17 +282,18 @@ public class MainView extends JFrame {
                 )
         );
 
+        /*
         toolsMenu.add(
                 createMenuItem(
                         "Планировщик",
                         KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK),
-                        null,
+                        controller.getPlannerButtonActionListener(),
                         "planner"
                 )
         );
 
         toolsMenu.addSeparator();
-
+*/
 
         toolsMenu.add(
                 createMenuItem(
