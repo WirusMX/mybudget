@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 public class ResourcesManager {
     private static final String TEXT_FILES_PREFIX = "/text/";
-    private static final String TEXT_FILES_EXT = ".txt/";
+    private static final String TEXT_FILES_EXT = ".txt";
 
     private static final String IMAGES_FILES_PREFIX = "/images/";
     private static final String IMAGES_FILES_EXT = ".png";
